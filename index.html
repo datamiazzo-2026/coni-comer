@@ -237,9 +237,222 @@
     font-weight:500;
     margin-top:6px;
   }
+
+  /* =========================================================
+     PANTALLA DE SELECCIÓN DE DISPOSITIVO
+     ========================================================= */
+  #device-select-screen{
+    position:fixed;
+    inset:0;
+    z-index:2000;
+    background:var(--bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  #device-select-screen.hidden{ display:none; }
+  .device-select-inner{
+    max-width:520px;
+    width:100%;
+    text-align:center;
+  }
+  .ds-logo{
+    height:56px;
+    width:auto;
+    margin-bottom:22px;
+  }
+  .ds-eyebrow{
+    font-size:0.72rem;
+    font-weight:600;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    margin-bottom:10px;
+  }
+  .ds-title{
+    font-size:1.3rem;
+    font-weight:700;
+    color:var(--ink);
+    margin:0 0 32px 0;
+    line-height:1.35;
+  }
+  .ds-cards{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    margin-bottom:44px;
+  }
+  .ds-card{
+    position:relative;
+    flex:1;
+    max-width:200px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px 16px;
+    cursor:pointer;
+    font-family:inherit;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    transition:border-color .15s ease, background .15s ease, transform .15s ease;
+  }
+  .ds-card:hover{
+    background:var(--bg-2);
+    border-color:var(--brand);
+    transform:translateY(-2px);
+  }
+  .ds-card svg{ color:var(--brand); }
+  .ds-card-label{
+    font-size:0.95rem;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .ds-card-sub{
+    font-size:0.75rem;
+    color:var(--ink-3);
+  }
+  .ds-card-tag{
+    display:none;
+    position:absolute;
+    top:-9px;
+    right:12px;
+    background:var(--brand);
+    color:#fff;
+    font-size:0.6rem;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding:3px 8px;
+    border-radius:999px;
+  }
+  .ds-card.suggested .ds-card-tag{ display:inline-block; }
+  .ds-collab{ margin-top:8px; }
+  .ds-collab-label{
+    font-size:0.65rem;
+    font-weight:600;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#b0bec5;
+    margin-bottom:10px;
+  }
+  .ds-collab-logo{
+    height:33px;
+    width:auto;
+    display:inline-block;
+  }
+
+  /* =========================================================
+     MODO MOBILE — activado manualmente al elegir "Celular"
+     (no depende de media queries automáticas)
+     ========================================================= */
+  .mobile-mode #site-header{
+    flex-wrap:wrap;
+    padding:12px 16px;
+    gap:8px;
+  }
+  .mobile-mode #site-header .header-left h1{
+    font-size:0.85rem;
+  }
+  .mobile-mode #site-header .header-left .updated{
+    font-size:0.68rem;
+  }
+  .mobile-mode #site-header .pdf-btn{
+    padding:6px 10px;
+    font-size:0.72rem;
+  }
+  .mobile-mode nav.tabs{
+    padding:0 8px;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    -webkit-overflow-scrolling:touch;
+  }
+  .mobile-mode nav.tabs button{
+    padding:10px 12px;
+    font-size:0.78rem;
+    white-space:nowrap;
+  }
+  .mobile-mode main{
+    padding:14px 12px 40px 12px;
+  }
+  .mobile-mode .campaign-banner{
+    font-size:0.72rem;
+    padding:8px 12px;
+  }
+  .mobile-mode .cards{
+    grid-template-columns:repeat(2, 1fr);
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .mobile-mode .card{
+    padding:10px 12px;
+  }
+  .mobile-mode .card .label{
+    font-size:0.6rem;
+  }
+  .mobile-mode .card .value{
+    font-size:1.05rem;
+  }
+  .mobile-mode .card .sub{
+    font-size:0.66rem;
+  }
+  .mobile-mode .chart-section{
+    padding:12px 14px;
+    margin-bottom:14px;
+  }
+  .mobile-mode .chart-section h2{
+    font-size:0.85rem;
+  }
+  .mobile-mode .chart-section .desc{
+    font-size:0.72rem;
+  }
+  .mobile-mode .metric-select button{
+    padding:5px 10px;
+    font-size:0.68rem;
+  }
+  .mobile-mode .chart-wrap{
+    height:220px;
+  }
 </style>
 </head>
 <body>
+
+<div id="device-select-screen">
+  <div class="device-select-inner">
+    <img src="CONINAGRO-1.jpg" alt="Coninagro" class="ds-logo">
+    <div class="ds-eyebrow">Coninagro</div>
+    <h1 class="ds-title">¿Desde dónde estás viendo este monitor?</h1>
+    <div class="ds-cards">
+      <button type="button" class="ds-card" data-mode="desktop" onclick="selectDevice('desktop')">
+        <span class="ds-card-tag">Sugerido</span>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>
+        <div class="ds-card-label">Computadora</div>
+        <div class="ds-card-sub">Desktop / notebook</div>
+      </button>
+      <button type="button" class="ds-card" data-mode="mobile" onclick="selectDevice('mobile')">
+        <span class="ds-card-tag">Sugerido</span>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="7" y="2" width="10" height="20" rx="2"></rect>
+          <line x1="11" y1="18" x2="13" y2="18"></line>
+        </svg>
+        <div class="ds-card-label">Celular</div>
+        <div class="ds-card-sub">Smartphone / tablet</div>
+      </button>
+    </div>
+    <div class="ds-collab">
+      <div class="ds-collab-label">En colaboración con</div>
+      <img src="Imagen1.png" alt="DATA Miazzo" class="ds-collab-logo">
+    </div>
+  </div>
+</div>
+
+<div id="app-shell">
 
 <header id="site-header">
   <div class="header-left">
@@ -362,6 +575,8 @@
   </section>
 
 </main>
+
+</div><!-- /#app-shell -->
 
 
 <script>
@@ -800,12 +1015,42 @@ function showTab(tabKey){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initDeviceSelect();
   initCrop('soja');
   initCrop('maiz');
   initCrop('trigo');
   initLiquidacion();
   initHeader();
 });
+
+/* =========================================================
+   SELECCIÓN DE DISPOSITIVO — pantalla inicial desktop/celular
+   ========================================================= */
+function detectMobile(){
+  const mq = window.matchMedia('(max-width: 760px)').matches;
+  const uaMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  return mq || uaMobile;
+}
+
+function applyDeviceMode(mode){
+  const appShell = document.getElementById('app-shell');
+  if (mode === 'mobile') appShell.classList.add('mobile-mode');
+  else appShell.classList.remove('mobile-mode');
+}
+
+function selectDevice(mode){
+  applyDeviceMode(mode);
+  document.getElementById('device-select-screen').classList.add('hidden');
+  // Por si el navegador no dispara el ResizeObserver de Chart.js a tiempo
+  Object.values(chartInstances).forEach(c => c && c.resize && c.resize());
+}
+
+function initDeviceSelect(){
+  const suggested = detectMobile() ? 'mobile' : 'desktop';
+  applyDeviceMode(suggested); // se aplica de entrada, pero la pantalla sigue visible para confirmar o cambiar
+  const card = document.querySelector(`.ds-card[data-mode="${suggested}"]`);
+  if (card) card.classList.add('suggested');
+}
 
 /* =========================================================
    HEADER — fecha de actualización + auto-hide en scroll
