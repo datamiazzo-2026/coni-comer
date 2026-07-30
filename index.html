@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor de Comercialización de Granos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --ink:      #16241f;
+    --ink-2:    #4d5f59;
+    --ink-3:    #8a9a95;
+    --brand:    #0f3d30;
+    --brand-2:  #14543f;
+    --line:     #e1e6e2;
+    --line-2:   #cdd6d1;
+    --bg:       #ffffff;
+    --bg-2:     #f6f7f5;
+    --surface:  #ffffff;
+    --up:       #1f6b3a;
+    --down:     #9c3b26;
+    --neutral:  #8a9a95;
+
+    --accent-soja:  #1f6b3a;
+    --accent-maiz:  #b8862c;
+    --accent-trigo: #9c3b26;
+    --accent-liquidacion: #2f6690;
+
+    --radius:8px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size:13px;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  #site-header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:16px 28px;
+    background:var(--brand);
+    box-shadow:0 1px 0 rgba(0,0,0,.08);
+    transition:transform .35s ease;
+  }
+  #site-header.header-hidden{
+    transform:translateY(-100%);
+  }
+  #site-header .header-left h1{
+    margin:0;
+    font-size:1.05rem;
+    font-weight:700;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:#fff;
+  }
+  #site-header .header-left .updated{
+    margin-top:4px;
+    font-size:0.75rem;
+    color:rgba(255,255,255,0.55);
+  }
+  #site-header .pdf-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-shrink:0;
+    padding:8px 16px;
+    border:1px solid rgba(255,255,255,.45);
+    border-radius:6px;
+    color:#fff;
+    font-family:inherit;
+    font-size:0.82rem;
+    font-weight:600;
+    text-decoration:none;
+    background:transparent;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  #site-header .pdf-btn:hover{
+    background:rgba(255,255,255,.1);
+    border-color:rgba(255,255,255,.7);
+  }
+  #site-header .pdf-btn svg{ flex-shrink:0; }
+
+  nav.tabs{
+    display:flex;
+    gap:4px;
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+    padding:0 28px;
+  }
+  nav.tabs button{
+    background:none;
+    border:none;
+    color:var(--ink-2);
+    padding:12px 20px;
+    font-family:inherit;
+    font-size:0.9rem;
+    font-weight:600;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:all .15s ease;
+  }
+  nav.tabs button:hover{ color:var(--ink); background:var(--bg-2); }
+  nav.tabs button.active{
+    color:var(--brand);
+    border-bottom:2px solid var(--brand);
+  }
+  main{
+    max-width:1180px;
+    margin:0 auto;
+    padding:24px 20px 60px 20px;
+  }
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+    gap:12px;
+    margin-bottom:24px;
+  }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    transition:background .15s ease;
+  }
+  .card:hover{ background:var(--bg-2); }
+  .card .label{
+    color:var(--ink-3);
+    font-size:0.68rem;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .card .value{
+    font-size:1.3rem;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .card .sub{
+    font-size:0.72rem;
+    color:var(--ink-3);
+    margin-top:4px;
+  }
+  .card.accent .value{ color:var(--tab-accent, var(--brand)); }
+
+  .campaign-banner{
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:10px 16px;
+    margin-bottom:16px;
+    font-size:0.82rem;
+    color:var(--ink-2);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .campaign-banner strong{ color:var(--ink); font-weight:600; }
+
+  .chart-section{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 20px;
+    margin-bottom:20px;
+  }
+  .chart-section h2{
+    margin:0 0 4px 0;
+    font-size:0.98rem;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .chart-section .desc{
+    color:var(--ink-3);
+    font-size:0.78rem;
+    margin-bottom:14px;
+  }
+  .metric-select{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .metric-select button{
+    background:var(--surface);
+    border:1px solid var(--line-2);
+    color:var(--ink-2);
+    padding:6px 14px;
+    font-family:inherit;
+    border-radius:999px;
+    font-size:0.75rem;
+    font-weight:500;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .metric-select button:hover{ background:var(--bg-2); color:var(--ink); }
+  .metric-select button.active{
+    background:var(--tab-accent, var(--brand));
+    color:#fff;
+    border-color:var(--tab-accent, var(--brand));
+  }
+  .chart-wrap{ position:relative; height:340px; }
+  .chart-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  @media (max-width:820px){
+    .chart-grid{ grid-template-columns:1fr; }
+  }
+  .chart-source{
+    font-size:0.68rem;
+    color:var(--ink-3);
+    margin-top:10px;
+    text-align:right;
+  }
+  .note{
+    font-size:0.7rem;
+    color:var(--down);
+    font-weight:500;
+    margin-top:6px;
+  }
+</style>
+</head>
+<body>
+
+<header id="site-header">
+  <div class="header-left">
+    <h1>CONINAGRO - COMERCIALIZACIÓN</h1>
+    <div class="updated">Actualizado: <span id="updated-date">—</span></div>
+  </div>
+  <a class="pdf-btn" href="https://drive.google.com/file/d/1X-Qb3ufhTfSG2cRcRnBU2rGvru3cwaZ5/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+      <polyline points="14 2 14 8 20 8"></polyline>
+    </svg>
+    Informe PDF
+  </a>
+</header>
+
+<nav class="tabs" id="tabs-nav">
+  <button class="tab-btn active" data-tab="soja" onclick="showTab('soja')">Soja</button>
+  <button class="tab-btn" data-tab="maiz" onclick="showTab('maiz')">Maíz</button>
+  <button class="tab-btn" data-tab="trigo" onclick="showTab('trigo')">Trigo</button>
+  <button class="tab-btn" data-tab="liquidacion" onclick="showTab('liquidacion')">Liquidación</button>
+</nav>
+
+<main>
+
+  <!-- ===================== SOJA ===================== -->
+  <section id="panel-soja" class="panel active">
+    <div class="campaign-banner">
+      <div>Campaña actual: <strong id="soja-campania">—</strong></div>
+      <div id="soja-nota"></div>
+    </div>
+    <div class="cards" id="soja-cards"></div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-soja)">
+      <h2>Evolución dentro de la campaña actual</h2>
+      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
+      <div class="metric-select" id="soja-metric-progress"></div>
+      <div class="chart-wrap"><canvas id="soja-chart-progress"></canvas></div>
+      <div class="chart-source">Fuente: MAGYP</div>
+    </div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-soja)">
+      <h2>Campaña actual vs. campañas anteriores</h2>
+      <div class="desc">Comparación al mismo corte de junio de cada campaña, desde 18/19 hasta 25/26.</div>
+      <div class="metric-select" id="soja-metric-history"></div>
+      <div class="chart-wrap"><canvas id="soja-chart-history"></canvas></div>
+      <div class="chart-source">Fuente: MAGYP</div>
+    </div>
+  </section>
+
+  <!-- ===================== MAIZ ===================== -->
+  <section id="panel-maiz" class="panel">
+    <div class="campaign-banner">
+      <div>Campaña actual: <strong id="maiz-campania">—</strong></div>
+      <div id="maiz-nota"></div>
+    </div>
+    <div class="cards" id="maiz-cards"></div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-maiz)">
+      <h2>Evolución dentro de la campaña actual</h2>
+      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
+      <div class="metric-select" id="maiz-metric-progress"></div>
+      <div class="chart-wrap"><canvas id="maiz-chart-progress"></canvas></div>
+      <div class="chart-source">Fuente: MAGYP</div>
+    </div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-maiz)">
+      <h2>Campaña actual vs. campañas anteriores</h2>
+      <div class="desc">Comparación al mismo corte de junio de cada campaña, desde 18/19 hasta 25/26.</div>
+      <div class="metric-select" id="maiz-metric-history"></div>
+      <div class="chart-wrap"><canvas id="maiz-chart-history"></canvas></div>
+      <div class="chart-source">Fuente: MAGYP</div>
+    </div>
+  </section>
+
+  <!-- ===================== TRIGO ===================== -->
+  <section id="panel-trigo" class="panel">
+    <div class="campaign-banner">
+      <div>Campaña actual: <strong id="trigo-campania">—</strong></div>
+      <div id="trigo-nota"></div>
+    </div>
+    <div class="cards" id="trigo-cards"></div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-trigo)">
+      <h2>Evolución dentro de la campaña actual</h2>
+      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
+      <div class="metric-select" id="trigo-metric-progress"></div>
+      <div class="chart-wrap"><canvas id="trigo-chart-progress"></canvas></div>
+      <div class="chart-source">Fuente: MAGYP</div>
+    </div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-trigo)">
+      <h2>Campaña actual vs. campañas anteriores</h2>
+      <div class="desc">Comparación al mismo corte de junio de cada campaña, desde 19/20 hasta 25/26.</div>
+      <div class="metric-select" id="trigo-metric-history"></div>
+      <div class="chart-wrap"><canvas id="trigo-chart-history"></canvas></div>
+      <div class="chart-source">Fuente: MAGYP</div>
+    </div>
+  </section>
+
+  <!-- ===================== LIQUIDACION ===================== -->
+  <section id="panel-liquidacion" class="panel">
+    <div class="campaign-banner">
+      <div>Liquidación de divisas del complejo granario · Fuente: CIARA-CEC</div>
+    </div>
+    <div class="cards" id="liquidacion-cards"></div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-liquidacion)">
+      <h2>Liquidación mensual</h2>
+      <div class="desc">Comparación mes a mes de lo liquidado en USD millones: 2026 (a la fecha) vs. 2025 y 2024.</div>
+      <div class="chart-wrap"><canvas id="liquidacion-chart-mensual"></canvas></div>
+      <div class="chart-source">Fuente: CIARA-CEC</div>
+    </div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-liquidacion)">
+      <h2>Acumulado Enero-Junio por año</h2>
+      <div class="desc">Cuánto se liquidó entre enero y junio de cada año, para comparar el arranque de 2026 contra campañas anteriores.</div>
+      <div class="chart-wrap"><canvas id="liquidacion-chart-acumulado"></canvas></div>
+      <div class="chart-source">Fuente: CIARA-CEC</div>
+    </div>
+  </section>
+
+</main>
+
+
+<script>
+/* =========================================================
+   DATOS — extraídos de Comercialización.xlsx (Google Drive)
+   Unidades: producción / comprado / saldo / queda en miles de toneladas (tal cual la fuente),
+   pct_comprado y *_2 en %, precio en USD/tn, queda_vender_musd en millones de USD.
+   ========================================================= */
+
+const SOJA_DATA = [
+  {"campaña":"18/19","mes_ano":"Jun-19","fecha_info":"6/19/2019","produccion":55300,"pct_comprado":48,"total_comprado":26462,"expo":6422,"industria":20041,"a_fijar_1":9874,"a_fijar_2":37,"queda_vender_tn":28838,"queda_vender_mas_fijar":null,"precio":null,"queda_vender_musd":null},
+  {"campaña":"19/20","mes_ano":"Jun-20","fecha_info":"6/17/2020","produccion":48800,"pct_comprado":52,"total_comprado":25162.8,"expo":6878.7,"industria":18284.1,"a_fijar_1":9088.1,"a_fijar_2":36,"queda_vender_tn":23637,"queda_vender_mas_fijar":32725,"precio":null,"queda_vender_musd":null},
+  {"campaña":"20/21","mes_ano":"Jun-21","fecha_info":"6/16/2021","produccion":46200,"pct_comprado":49,"total_comprado":22503.8,"expo":5385.2,"industria":17118.6,"a_fijar_1":6965.5,"a_fijar_2":31,"queda_vender_tn":23696,"queda_vender_mas_fijar":30662,"precio":null,"queda_vender_musd":null},
+  {"campaña":"21/22","mes_ano":"Jun-22","fecha_info":"6/22/2022","produccion":44000,"pct_comprado":43,"total_comprado":19097.6,"expo":2608.4,"industria":16489.2,"a_fijar_1":8173.9,"a_fijar_2":43,"queda_vender_tn":24902,"queda_vender_mas_fijar":33076,"precio":null,"queda_vender_musd":null},
+  {"campaña":"22/23","mes_ano":"Jun-23","fecha_info":"6/21/2023","produccion":25000,"pct_comprado":43,"total_comprado":10803.9,"expo":1363.7,"industria":9440.2,"a_fijar_1":3692.3,"a_fijar_2":34,"queda_vender_tn":14196,"queda_vender_mas_fijar":17888,"precio":null,"queda_vender_musd":null,"note":"Campaña de sequía severa"},
+  {"campaña":"23/24","mes_ano":"Jun-24","fecha_info":"6/19/2024","produccion":50500,"pct_comprado":43,"total_comprado":21632.9,"expo":4468.9,"industria":17164.0,"a_fijar_1":8588.0,"a_fijar_2":40,"queda_vender_tn":28867,"queda_vender_mas_fijar":37455,"precio":null,"queda_vender_musd":null},
+  {"campaña":"24/25","mes_ano":"Jun-25","fecha_info":"6/25/2025","produccion":51100,"pct_comprado":47,"total_comprado":23825.9,"expo":5407.0,"industria":18418.9,"a_fijar_1":5539.1,"a_fijar_2":23,"queda_vender_tn":27274,"queda_vender_mas_fijar":32813,"precio":null,"queda_vender_musd":null},
+  {"campaña":"24/25","mes_ano":"Nov-25","fecha_info":"11/19/2025","produccion":51100,"pct_comprado":78,"total_comprado":39923.6,"expo":10971.5,"industria":28952.1,"a_fijar_1":3206.7,"a_fijar_2":8,"queda_vender_tn":11176,"queda_vender_mas_fijar":14383,"precio":437,"queda_vender_musd":4884},
+  {"campaña":"24/25","mes_ano":"Dec-25","fecha_info":"12/17/2025","produccion":51100,"pct_comprado":80,"total_comprado":41099.9,"expo":11110.9,"industria":29989.0,"a_fijar_1":2890.7,"a_fijar_2":7,"queda_vender_tn":10000,"queda_vender_mas_fijar":12891,"precio":418,"queda_vender_musd":4180},
+  {"campaña":"24/25","mes_ano":"Jan-26","fecha_info":"1/21/2026","produccion":51100,"pct_comprado":84,"total_comprado":42709.3,"expo":11342.0,"industria":31367.3,"a_fijar_1":2597.0,"a_fijar_2":6,"queda_vender_tn":8391,"queda_vender_mas_fijar":10988,"precio":407,"queda_vender_musd":3415},
+  {"campaña":"24/25","mes_ano":"Feb-26","fecha_info":"2/18/2026","produccion":51100,"pct_comprado":86,"total_comprado":43712.9,"expo":11262.7,"industria":32450.2,"a_fijar_1":2594.9,"a_fijar_2":6,"queda_vender_tn":7387,"queda_vender_mas_fijar":9982,"precio":433,"queda_vender_musd":3199},
+  {"campaña":"25/26","mes_ano":"Mar-26","fecha_info":"3/25/2026","produccion":50100,"pct_comprado":18,"total_comprado":9113.8,"expo":1225.6,"industria":7888.2,"a_fijar_1":5276.5,"a_fijar_2":58,"queda_vender_tn":40986,"queda_vender_mas_fijar":46263,"precio":434,"queda_vender_musd":17788},
+  {"campaña":"25/26","mes_ano":"Apr-26","fecha_info":"4/22/2026","produccion":50100,"pct_comprado":24,"total_comprado":12181.8,"expo":1375.4,"industria":10806.4,"a_fijar_1":7404.7,"a_fijar_2":61,"queda_vender_tn":37918,"queda_vender_mas_fijar":45323,"precio":423,"queda_vender_musd":16039},
+  {"campaña":"25/26","mes_ano":"May-26","fecha_info":"5/20/2026","produccion":50100,"pct_comprado":32,"total_comprado":16278.1,"expo":2167.2,"industria":14110.9,"a_fijar_1":7912.6,"a_fijar_2":49,"queda_vender_tn":33822,"queda_vender_mas_fijar":41735,"precio":434,"queda_vender_musd":14679},
+  {"campaña":"25/26","mes_ano":"Jun-26","fecha_info":"6/24/2026","produccion":50100,"pct_comprado":41,"total_comprado":20393.5,"expo":2439.7,"industria":17953.8,"a_fijar_1":7780.1,"a_fijar_2":38,"queda_vender_tn":29707,"queda_vender_mas_fijar":37487,"precio":416,"queda_vender_musd":12358}
+];
+
+const MAIZ_DATA = [
+  {"campaña":"18/19","mes_ano":"Jun-19","fecha_info":"6/19/2019","produccion":57000,"pct_comprado":43,"total_comprado":24778,"expo":23495,"industria":1284,"saldo_fijar_1":645,"saldo_fijar_2":3,"queda_vender_tn":32222,"precio":null,"queda_vender_musd":null},
+  {"campaña":"19/20","mes_ano":"Jun-20","fecha_info":"6/17/2020","produccion":55500,"pct_comprado":50,"total_comprado":27665,"expo":26345,"industria":1319,"saldo_fijar_1":1290,"saldo_fijar_2":5,"queda_vender_tn":27836,"precio":null,"queda_vender_musd":null},
+  {"campaña":"20/21","mes_ano":"Jun-21","fecha_info":"6/16/2021","produccion":60500,"pct_comprado":51,"total_comprado":30591,"expo":29412,"industria":1180,"saldo_fijar_1":4490,"saldo_fijar_2":15,"queda_vender_tn":29909,"precio":null,"queda_vender_musd":null},
+  {"campaña":"21/22","mes_ano":"Jun-22","fecha_info":"6/22/2022","produccion":59000,"pct_comprado":51,"total_comprado":30369,"expo":28925,"industria":1444,"saldo_fijar_1":7168,"saldo_fijar_2":24,"queda_vender_tn":28631,"precio":null,"queda_vender_musd":null},
+  {"campaña":"22/23","mes_ano":"Jun-23","fecha_info":"6/21/2023","produccion":41400,"pct_comprado":34,"total_comprado":14274,"expo":13383,"industria":891,"saldo_fijar_1":5080,"saldo_fijar_2":36,"queda_vender_tn":27126,"precio":null,"queda_vender_musd":null,"note":"Campaña de sequía severa"},
+  {"campaña":"23/24","mes_ano":"Jun-24","fecha_info":"6/19/2024","produccion":57700,"pct_comprado":38,"total_comprado":22033,"expo":20710,"industria":1323,"saldo_fijar_1":7577,"saldo_fijar_2":34,"queda_vender_tn":35667,"precio":186,"queda_vender_musd":6634},
+  {"campaña":"24/25","mes_ano":"Jun-25","fecha_info":"6/25/2025","produccion":51700,"pct_comprado":41,"total_comprado":21068,"expo":19376.5,"industria":1691.4,"saldo_fijar_1":5229.0,"saldo_fijar_2":25,"queda_vender_tn":30632,"precio":null,"queda_vender_musd":null},
+  {"campaña":"24/25","mes_ano":"Nov-25","fecha_info":"11/19/2025","produccion":51700,"pct_comprado":61,"total_comprado":31645,"expo":27471,"industria":4174,"saldo_fijar_1":4038,"saldo_fijar_2":13,"queda_vender_tn":20055,"precio":208,"queda_vender_musd":4171},
+  {"campaña":"24/25","mes_ano":"Dec-25","fecha_info":"12/17/2025","produccion":51700,"pct_comprado":63,"total_comprado":32654,"expo":28480,"industria":4174,"saldo_fijar_1":3455,"saldo_fijar_2":11,"queda_vender_tn":19046,"precio":216,"queda_vender_musd":4114},
+  {"campaña":"24/25","mes_ano":"Jan-26","fecha_info":"1/21/2026","produccion":51700,"pct_comprado":68,"total_comprado":35031,"expo":30002,"industria":5029,"saldo_fijar_1":3093,"saldo_fijar_2":9,"queda_vender_tn":16669,"precio":216,"queda_vender_musd":3601},
+  {"campaña":"24/25","mes_ano":"Feb-26","fecha_info":"2/18/2026","produccion":51700,"pct_comprado":69,"total_comprado":35752,"expo":30309,"industria":5443,"saldo_fijar_1":3063,"saldo_fijar_2":9,"queda_vender_tn":15949,"precio":210,"queda_vender_musd":3349},
+  {"campaña":"25/26","mes_ano":"Mar-26","fecha_info":"3/25/2026","produccion":64000,"pct_comprado":31,"total_comprado":20125,"expo":19697.5,"industria":427.1,"saldo_fijar_1":7188.0,"saldo_fijar_2":36,"queda_vender_tn":43875,"precio":207,"queda_vender_musd":9082},
+  {"campaña":"25/26","mes_ano":"Apr-26","fecha_info":"4/22/2026","produccion":64000,"pct_comprado":38,"total_comprado":24326,"expo":23200.9,"industria":1125.1,"saldo_fijar_1":7179.9,"saldo_fijar_2":30,"queda_vender_tn":39674,"precio":211,"queda_vender_musd":8371},
+  {"campaña":"25/26","mes_ano":"May-26","fecha_info":"5/20/2026","produccion":64000,"pct_comprado":42,"total_comprado":26891,"expo":25766.1,"industria":1125.1,"saldo_fijar_1":6712.2,"saldo_fijar_2":25,"queda_vender_tn":37109,"precio":210,"queda_vender_musd":7793},
+  {"campaña":"25/26","mes_ano":"Jun-26","fecha_info":"6/24/2026","produccion":64000,"pct_comprado":47,"total_comprado":29908,"expo":27737.9,"industria":2169.6,"saldo_fijar_1":6580.9,"saldo_fijar_2":22,"queda_vender_tn":34093,"precio":196,"queda_vender_musd":6682}
+];
+
+const TRIGO_DATA = [
+  {"campaña":"19/20","mes_ano":"Jun-20","fecha_info":"6/17/2020","produccion":19800,"pct_comprado":92,"total_comprado":18289,"expo":14959.7,"industria":3329.7,"saldo_fijar_1":1290.0,"saldo_fijar_2":7,"queda_vender_tn":1511,"precio":null,"queda_vender_musd":null},
+  {"campaña":"20/21","mes_ano":"Jun-21","fecha_info":"6/16/2021","produccion":17700,"pct_comprado":77,"total_comprado":13614,"expo":10810.8,"industria":2803.1,"saldo_fijar_1":1378.3,"saldo_fijar_2":10,"queda_vender_tn":4086,"precio":null,"queda_vender_musd":null},
+  {"campaña":"21/22","mes_ano":"Jun-22","fecha_info":"6/22/2022","produccion":22200,"pct_comprado":92,"total_comprado":20462,"expo":17426.5,"industria":3035.5,"saldo_fijar_1":1874.9,"saldo_fijar_2":9,"queda_vender_tn":1738,"precio":null,"queda_vender_musd":null},
+  {"campaña":"22/23","mes_ano":"Jun-23","fecha_info":"6/21/2023","produccion":12600,"pct_comprado":77,"total_comprado":9757,"expo":6453.1,"industria":3303.5,"saldo_fijar_1":1776.7,"saldo_fijar_2":18,"queda_vender_tn":2843,"precio":null,"queda_vender_musd":null,"note":"Campaña de sequía severa"},
+  {"campaña":"23/24","mes_ano":"Jun-24","fecha_info":"6/26/2024","produccion":15900,"pct_comprado":68,"total_comprado":10857,"expo":7500.6,"industria":3355.9,"saldo_fijar_1":1212.7,"saldo_fijar_2":11,"queda_vender_tn":5044,"precio":null,"queda_vender_musd":null},
+  {"campaña":"24/25","mes_ano":"Jun-25","fecha_info":"6/25/2025","produccion":18500,"pct_comprado":77,"total_comprado":14266,"expo":10757.3,"industria":3508.5,"saldo_fijar_1":1045.2,"saldo_fijar_2":7,"queda_vender_tn":4234,"precio":null,"queda_vender_musd":null},
+  {"campaña":"25/26","mes_ano":"Nov-25","fecha_info":"11/19/2025","produccion":27900,"pct_comprado":25,"total_comprado":6947,"expo":6513.3,"industria":433.7,"saldo_fijar_1":2641.1,"saldo_fijar_2":38,"queda_vender_tn":20953,"precio":212,"queda_vender_musd":4442},
+  {"campaña":"25/26","mes_ano":"Dec-25","fecha_info":"12/17/2025","produccion":27900,"pct_comprado":36,"total_comprado":10135,"expo":9125.2,"industria":1009.6,"saldo_fijar_1":2971.2,"saldo_fijar_2":29,"queda_vender_tn":17765,"precio":208,"queda_vender_musd":3695},
+  {"campaña":"25/26","mes_ano":"Jan-26","fecha_info":"1/21/2026","produccion":27900,"pct_comprado":50,"total_comprado":13989,"expo":12488.8,"industria":1499.9,"saldo_fijar_1":3244.0,"saldo_fijar_2":23,"queda_vender_tn":13911,"precio":208,"queda_vender_musd":2894},
+  {"campaña":"25/26","mes_ano":"Feb-26","fecha_info":"2/18/2026","produccion":27900,"pct_comprado":54,"total_comprado":15047,"expo":13167.5,"industria":1879.0,"saldo_fijar_1":3021.9,"saldo_fijar_2":20,"queda_vender_tn":12854,"precio":207,"queda_vender_musd":2661},
+  {"campaña":"25/26","mes_ano":"Mar-26","fecha_info":"3/25/2026","produccion":27900,"pct_comprado":59,"total_comprado":16425,"expo":14069.2,"industria":2355.5,"saldo_fijar_1":2635.1,"saldo_fijar_2":16,"queda_vender_tn":11475,"precio":215,"queda_vender_musd":2467},
+  {"campaña":"25/26","mes_ano":"Apr-26","fecha_info":"4/22/2026","produccion":27900,"pct_comprado":62,"total_comprado":17284,"expo":14598.8,"industria":2684.9,"saldo_fijar_1":2450.5,"saldo_fijar_2":14,"queda_vender_tn":10616,"precio":227,"queda_vender_musd":2410},
+  {"campaña":"25/26","mes_ano":"May-26","fecha_info":"5/20/2026","produccion":27900,"pct_comprado":65,"total_comprado":18196,"expo":15237.8,"industria":2958.4,"saldo_fijar_1":2278.9,"saldo_fijar_2":13,"queda_vender_tn":9704,"precio":233,"queda_vender_musd":2261},
+  {"campaña":"25/26","mes_ano":"Jun-26","fecha_info":"6/24/2026","produccion":27900,"pct_comprado":70,"total_comprado":19396,"expo":15952.1,"industria":3444.1,"saldo_fijar_1":1983.2,"saldo_fijar_2":10,"queda_vender_tn":8504,"precio":236,"queda_vender_musd":2007}
+];
+
+/* =========================================================
+   LIQUIDACIÓN DE DIVISAS — extraído de la hoja CIARA-CEC
+   (mismo archivo de Drive, pestaña "Liquidación mensual").
+   Valores en USD millones. 2026 solo tiene datos hasta junio.
+   ========================================================= */
+const LIQUIDACION_DATA = {
+  meses: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+  mensual: {
+    2024: [1522.4,1499.3,1501.8,1909.9,2612.6,1977.9,2616.2,2451.5,2480.5,2553.2,1999.2,1966.1],
+    2025: [2073.5,2181.3,1879.8,2524.4,3054.2,3706.4,4102.0,1817.8,7107.9,1116.8,759.7,1015.0],
+    2026: [1850.8,1289.2,2032.5,2494.5,2676.8,3007.7,null,null,null,null,null,null]
+  },
+  // Acumulado corrido Enero-Junio de cada año (USD millones)
+  acumuladoEneJun: {
+    2019:10359, 2020:9307, 2021:16660, 2022:19145, 2023:11032, 2024:11024, 2025:15420, 2026:13351
+  },
+  // Total del año completo, como referencia (USD millones) — 2026 no incluido por estar incompleto
+  totalAnual: {
+    2019:23359, 2020:20274, 2021:32808, 2022:40438, 2023:19742, 2024:25091, 2025:31339
+  }
+};
+
+/* =========================================================
+   CONFIG POR CULTIVO
+   ========================================================= */
+if (window.Chart) {
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.color = '#4d5f59';
+}
+
+const CROPS = {
+  soja: {
+    data: SOJA_DATA,
+    color: '#1f6b3a',
+    saldoField: 'a_fijar_1',
+    saldoPctField: 'a_fijar_2',
+    metrics: [
+      {key:'produccion', label:'Producción (mil tn)'},
+      {key:'pct_comprado', label:'% Comercializado'},
+      {key:'total_comprado', label:'Total comprado (mil tn)'},
+      {key:'a_fijar_1', label:'Saldo a fijar (mil tn)'},
+      {key:'queda_vender_tn', label:'Queda por vender (mil tn)'},
+      {key:'precio', label:'Precio (USD/tn)'}
+    ]
+  },
+  maiz: {
+    data: MAIZ_DATA,
+    color: '#b8862c',
+    saldoField: 'saldo_fijar_1',
+    saldoPctField: 'saldo_fijar_2',
+    metrics: [
+      {key:'produccion', label:'Producción (mil tn)'},
+      {key:'pct_comprado', label:'% Comercializado'},
+      {key:'total_comprado', label:'Total comprado (mil tn)'},
+      {key:'saldo_fijar_1', label:'Saldo a fijar (mil tn)'},
+      {key:'queda_vender_tn', label:'Queda por vender (mil tn)'},
+      {key:'precio', label:'Precio (USD/tn)'}
+    ]
+  },
+  trigo: {
+    data: TRIGO_DATA,
+    color: '#9c3b26',
+    saldoField: 'saldo_fijar_1',
+    saldoPctField: 'saldo_fijar_2',
+    metrics: [
+      {key:'produccion', label:'Producción (mil tn)'},
+      {key:'pct_comprado', label:'% Comercializado'},
+      {key:'total_comprado', label:'Total comprado (mil tn)'},
+      {key:'saldo_fijar_1', label:'Saldo a fijar (mil tn)'},
+      {key:'queda_vender_tn', label:'Queda por vender (mil tn)'},
+      {key:'precio', label:'Precio (USD/tn)'}
+    ]
+  }
+};
+
+const numFmt = (v, decimals=0) => {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  return Number(v).toLocaleString('es-AR', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+};
+
+const chartInstances = {};
+const activeMetric = { progress:{}, history:{} };
+
+function buildCards(cropKey){
+  const cfg = CROPS[cropKey];
+  const rows = cfg.data;
+  const last = rows[rows.length-1];
+  const container = document.getElementById(`${cropKey}-cards`);
+
+  document.getElementById(`${cropKey}-campania`).textContent = last.campaña;
+  const notaEl = document.getElementById(`${cropKey}-nota`);
+  notaEl.textContent = last.note ? last.note : '';
+
+  const cards = [
+    {label:'Producción', value:`${numFmt(last.produccion)}`, sub:'mil tn', accent:true},
+    {label:'% Comercializado', value:`${numFmt(last.pct_comprado)}%`, sub:'sobre producción'},
+    {label:'Total comprado', value:numFmt(last.total_comprado,1), sub:'mil tn'},
+    {label:'Saldo a fijar', value:numFmt(last[cfg.saldoField],1), sub:`mil tn (${numFmt(last[cfg.saldoPctField])}% del comprado)`},
+    {label:'Queda por vender', value:numFmt(last.queda_vender_tn), sub:'mil tn'},
+    {label:'Queda por vender', value: last.queda_vender_musd ? `US$ ${numFmt(last.queda_vender_musd)} M` : '—', sub:'valorizado'}
+  ];
+
+  container.innerHTML = cards.map(c => `
+    <div class="card ${c.accent?'accent':''}">
+      <div class="label">${c.label}</div>
+      <div class="value">${c.value}</div>
+      <div class="sub">${c.sub}</div>
+    </div>
+  `).join('');
+}
+
+function buildMetricSelector(cropKey, chartType){
+  const cfg = CROPS[cropKey];
+  const container = document.getElementById(`${cropKey}-metric-${chartType}`);
+  activeMetric[chartType][cropKey] = cfg.metrics[1].key; // default: % Comercializado
+
+  container.innerHTML = cfg.metrics.map((m,i) => `
+    <button data-metric="${m.key}" class="${i===1?'active':''}" onclick="selectMetric('${cropKey}','${chartType}','${m.key}', this)">${m.label}</button>
+  `).join('');
+}
+
+function selectMetric(cropKey, chartType, metricKey, btn){
+  activeMetric[chartType][cropKey] = metricKey;
+  const container = btn.parentElement;
+  container.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (chartType === 'progress') renderProgressChart(cropKey);
+  else renderHistoryChart(cropKey);
+}
+
+function metricLabel(cropKey, key){
+  return CROPS[cropKey].metrics.find(m => m.key === key)?.label || key;
+}
+
+function renderProgressChart(cropKey){
+  const cfg = CROPS[cropKey];
+  const metric = activeMetric.progress[cropKey];
+  const currentCampaign = cfg.data[cfg.data.length-1].campaña;
+  // últimos 8 registros = progresión cronológica de la campaña en curso (Nov -> Jun)
+  const rows = cfg.data.slice(-8);
+  const labels = rows.map(r => r.mes_ano);
+  const values = rows.map(r => r[metric]);
+
+  const ctxId = `${cropKey}-chart-progress`;
+  const ctx = document.getElementById(ctxId).getContext('2d');
+  if (chartInstances[ctxId]) chartInstances[ctxId].destroy();
+
+  chartInstances[ctxId] = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label: metricLabel(cropKey, metric),
+        data: values,
+        borderColor: cfg.color,
+        backgroundColor: cfg.color + '14',
+        fill:true,
+        tension:0.3,
+        pointRadius:4,
+        pointBackgroundColor: cfg.color
+      }]
+    },
+    options: chartOptions(`Campaña ${currentCampaign}`)
+  });
+}
+
+function renderHistoryChart(cropKey){
+  const cfg = CROPS[cropKey];
+  const metric = activeMetric.history[cropKey];
+  // una fila por campaña, tomando el corte de junio de cada año (comparable entre campañas)
+  const rows = cfg.data.filter(r => r.mes_ano.startsWith('Jun'));
+  const labels = rows.map(r => r.campaña);
+  const values = rows.map(r => r[metric]);
+  const colors = rows.map((r,i) => i === rows.length-1 ? cfg.color : cfg.color + '55');
+
+  const ctxId = `${cropKey}-chart-history`;
+  const ctx = document.getElementById(ctxId).getContext('2d');
+  if (chartInstances[ctxId]) chartInstances[ctxId].destroy();
+
+  chartInstances[ctxId] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label: metricLabel(cropKey, metric),
+        data: values,
+        backgroundColor: colors,
+        borderRadius:4
+      }]
+    },
+    options: chartOptions('Corte a fin de junio de cada campaña')
+  });
+}
+
+function chartOptions(subtitle){
+  return {
+    responsive:true,
+    maintainAspectRatio:false,
+    plugins:{
+      legend:{ display:false },
+      tooltip:{
+        backgroundColor:'#ffffff',
+        titleColor:'#16241f',
+        bodyColor:'#4d5f59',
+        borderColor:'#e1e6e2',
+        borderWidth:1,
+        padding:10,
+        cornerRadius:6,
+        titleFont:{weight:'600'}
+      },
+      subtitle:{
+        display:true,
+        text:subtitle,
+        color:'#8a9a95',
+        font:{size:11, weight:'500'},
+        padding:{bottom:10}
+      }
+    },
+    scales:{
+      x:{
+        ticks:{color:'#8a9a95'},
+        grid:{display:false},
+        border:{color:'#e1e6e2'}
+      },
+      y:{
+        ticks:{color:'#8a9a95'},
+        grid:{color:'#eef1ef', drawTicks:false},
+        border:{display:false},
+        beginAtZero:false
+      }
+    }
+  };
+}
+
+/* =========================================================
+   PESTAÑA LIQUIDACIÓN
+   ========================================================= */
+function pctChange(current, prior){
+  if (current === null || prior === null || !prior) return null;
+  return ((current - prior) / prior) * 100;
+}
+
+function buildLiquidacionCards(){
+  const d = LIQUIDACION_DATA;
+  const container = document.getElementById('liquidacion-cards');
+
+  const junio2026 = d.mensual[2026][5];
+  const junio2025 = d.mensual[2025][5];
+  const junioVar = pctChange(junio2026, junio2025);
+
+  const acum2026 = d.acumuladoEneJun[2026];
+  const acum2025 = d.acumuladoEneJun[2025];
+  const acumVar = pctChange(acum2026, acum2025);
+
+  const anosPrevios = [2019,2020,2021,2022,2023,2024,2025];
+  const promedioAcumHist = anosPrevios.reduce((s,y) => s + d.acumuladoEneJun[y], 0) / anosPrevios.length;
+  const acumVsPromedio = pctChange(acum2026, promedioAcumHist);
+
+  const cards = [
+    {label:'Liquidado en Junio 2026', value:`US$ ${numFmt(junio2026)} M`, sub: junioVar !== null ? `${junioVar>=0?'+':''}${numFmt(junioVar,1)}% vs. Jun-25` : '—', accent:true},
+    {label:'Acumulado Ene-Jun 2026', value:`US$ ${numFmt(acum2026)} M`, sub: acumVar !== null ? `${acumVar>=0?'+':''}${numFmt(acumVar,1)}% vs. mismo período 2025` : '—'},
+    {label:'Promedio histórico Ene-Jun', value:`US$ ${numFmt(promedioAcumHist)} M`, sub:'2019-2025 · 2026 va ' + (acumVsPromedio>=0?'+':'') + numFmt(acumVsPromedio,1) + '% vs. ese promedio'},
+    {label:'Total liquidado 2025', value:`US$ ${numFmt(d.totalAnual[2025])} M`, sub:'año completo, referencia'}
+  ];
+
+  container.innerHTML = cards.map(c => `
+    <div class="card ${c.accent?'accent':''}">
+      <div class="label">${c.label}</div>
+      <div class="value">${c.value}</div>
+      <div class="sub">${c.sub}</div>
+    </div>
+  `).join('');
+}
+
+function renderLiquidacionMensualChart(){
+  const d = LIQUIDACION_DATA;
+  const color = '#2f6690';
+  const ctxId = 'liquidacion-chart-mensual';
+  const ctx = document.getElementById(ctxId).getContext('2d');
+  if (chartInstances[ctxId]) chartInstances[ctxId].destroy();
+
+  chartInstances[ctxId] = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: d.meses,
+      datasets:[
+        {
+          label:'2024',
+          data: d.mensual[2024],
+          borderColor:'#cdd6d1',
+          backgroundColor:'transparent',
+          borderDash:[4,3],
+          tension:0.3,
+          pointRadius:2
+        },
+        {
+          label:'2025',
+          data: d.mensual[2025],
+          borderColor:'#8a9a95',
+          backgroundColor:'transparent',
+          tension:0.3,
+          pointRadius:2
+        },
+        {
+          label:'2026',
+          data: d.mensual[2026],
+          borderColor: color,
+          backgroundColor: color + '14',
+          fill:true,
+          tension:0.3,
+          pointRadius:4,
+          pointBackgroundColor: color,
+          borderWidth:2.5
+        }
+      ]
+    },
+    options: {
+      ...chartOptions('USD millones liquidados por mes'),
+      plugins:{
+        ...chartOptions().plugins,
+        legend:{ display:true, position:'top', align:'end', labels:{boxWidth:12, color:'#4d5f59', font:{size:11}} },
+        subtitle:{ display:true, text:'USD millones liquidados por mes', color:'#8a9a95', font:{size:11,weight:'500'}, padding:{bottom:10} }
+      }
+    }
+  });
+}
+
+function renderLiquidacionAcumuladoChart(){
+  const d = LIQUIDACION_DATA;
+  const color = '#2f6690';
+  const years = Object.keys(d.acumuladoEneJun).map(Number).sort();
+  const labels = years.map(String);
+  const values = years.map(y => d.acumuladoEneJun[y]);
+  const colors = years.map(y => y === 2026 ? color : color + '55');
+
+  const ctxId = 'liquidacion-chart-acumulado';
+  const ctx = document.getElementById(ctxId).getContext('2d');
+  if (chartInstances[ctxId]) chartInstances[ctxId].destroy();
+
+  chartInstances[ctxId] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label:'Acumulado Ene-Jun (USD millones)',
+        data: values,
+        backgroundColor: colors,
+        borderRadius:4
+      }]
+    },
+    options: chartOptions('Acumulado enero-junio, en USD millones')
+  });
+}
+
+function initLiquidacion(){
+  buildLiquidacionCards();
+  renderLiquidacionMensualChart();
+  renderLiquidacionAcumuladoChart();
+}
+
+function initCrop(cropKey){
+  buildCards(cropKey);
+  buildMetricSelector(cropKey, 'progress');
+  buildMetricSelector(cropKey, 'history');
+  renderProgressChart(cropKey);
+  renderHistoryChart(cropKey);
+}
+
+function showTab(tabKey){
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`panel-${tabKey}`).classList.add('active');
+  document.querySelector(`.tab-btn[data-tab="${tabKey}"]`).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initCrop('soja');
+  initCrop('maiz');
+  initCrop('trigo');
+  initLiquidacion();
+  initHeader();
+});
+
+/* =========================================================
+   HEADER — fecha de actualización + auto-hide en scroll
+   ========================================================= */
+function initHeader(){
+  const header = document.getElementById('site-header');
+  const updatedEl = document.getElementById('updated-date');
+
+  // Fecha de actualización: la más reciente entre los 3 cultivos
+  const lastDates = [SOJA_DATA, MAIZ_DATA, TRIGO_DATA].map(d => d[d.length-1].fecha_info);
+  updatedEl.textContent = lastDates[0]; // los 3 cultivos comparten el mismo corte mensual
+
+  // Empuja el contenido para que la nav de tabs no quede tapada por el header fijo
+  function syncOffset(){
+    document.body.style.paddingTop = header.offsetHeight + 'px';
+  }
+  syncOffset();
+  window.addEventListener('resize', syncOffset);
+
+  // Auto-hide: se oculta al bajar, reaparece al subir, con transición suave (CSS transition)
+  let lastScrollY = window.pageYOffset;
+  let ticking = false;
+
+  window.addEventListener('scroll', () => {
+    if (!ticking){
+      window.requestAnimationFrame(() => {
+        const currentY = window.pageYOffset;
+        const scrolledDown = currentY > lastScrollY;
+        const pastThreshold = currentY > header.offsetHeight;
+
+        if (scrolledDown && pastThreshold){
+          header.classList.add('header-hidden');
+        } else {
+          header.classList.remove('header-hidden');
+        }
+
+        lastScrollY = currentY <= 0 ? 0 : currentY;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive:true });
+}
+</script>
+
+</body>
+</html>
