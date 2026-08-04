@@ -495,7 +495,7 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-soja)">
       <h2>Evolución dentro de la campaña actual</h2>
-      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
+      <div class="desc">Progreso mensual de la comercialización: campaña actual vs. campaña anterior y promedio de los últimos 5 años, por mes de campaña.</div>
       <div class="metric-select" id="soja-metric-progress"></div>
       <div class="chart-wrap"><canvas id="soja-chart-progress"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
@@ -520,7 +520,7 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-maiz)">
       <h2>Evolución dentro de la campaña actual</h2>
-      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
+      <div class="desc">Progreso mensual de la comercialización: campaña actual vs. campaña anterior y promedio de los últimos 5 años, por mes de campaña.</div>
       <div class="metric-select" id="maiz-metric-progress"></div>
       <div class="chart-wrap"><canvas id="maiz-chart-progress"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
@@ -545,7 +545,7 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-trigo)">
       <h2>Evolución dentro de la campaña actual</h2>
-      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
+      <div class="desc">Progreso mensual de la comercialización: campaña actual vs. campaña anterior y promedio de los últimos 5 años, por mes de campaña.</div>
       <div class="metric-select" id="trigo-metric-progress"></div>
       <div class="chart-wrap"><canvas id="trigo-chart-progress"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
@@ -711,10 +711,14 @@ function parseComprasVentas(text){
     const t = buildCropRow(cols, 30, false);
     if (t) raw.trigo.push(t);
   }
+  const sortByDate = arr => arr.slice().sort((a, b) => new Date(a.fecha_info) - new Date(b.fecha_info));
   return {
     soja: buildCropSeries(raw.soja),
     maiz: buildCropSeries(raw.maiz),
-    trigo: buildCropSeries(raw.trigo)
+    trigo: buildCropSeries(raw.trigo),
+    rawSoja: sortByDate(raw.soja),
+    rawMaiz: sortByDate(raw.maiz),
+    rawTrigo: sortByDate(raw.trigo)
   };
 }
 
@@ -768,6 +772,9 @@ async function loadLiveData(){
     if (cv.soja.length) SOJA_DATA = cv.soja;
     if (cv.maiz.length) MAIZ_DATA = cv.maiz;
     if (cv.trigo.length) TRIGO_DATA = cv.trigo;
+    if (cv.rawSoja.length) SOJA_RAW = cv.rawSoja;
+    if (cv.rawMaiz.length) MAIZ_RAW = cv.rawMaiz;
+    if (cv.rawTrigo.length) TRIGO_RAW = cv.rawTrigo;
 
     const liq = parseLiquidacion(liquidacionText);
     if (Object.keys(liq.mensual).length) LIQUIDACION_DATA = liq;
@@ -836,6 +843,13 @@ let TRIGO_DATA = [
   {"campaña":"25/26","mes_ano":"Jun-26","fecha_info":"6/24/2026","produccion":27900,"pct_comprado":70,"total_comprado":19396,"expo":15952.1,"industria":3444.1,"saldo_fijar_1":1983.2,"saldo_fijar_2":10,"queda_vender_tn":8504,"precio":236,"queda_vender_musd":2007}
 ];
 
+// Filas completas (todos los meses de todas las campañas) para superponer campaña actual,
+// campaña anterior y promedio histórico en el gráfico de evolución. De respaldo usan el
+// mismo array curado (solo tienen el detalle mensual completo de la campaña más reciente).
+let SOJA_RAW = SOJA_DATA;
+let MAIZ_RAW = MAIZ_DATA;
+let TRIGO_RAW = TRIGO_DATA;
+
 /* =========================================================
    LIQUIDACIÓN DE DIVISAS — respaldo, extraído de la hoja CIARA-CEC
    (mismo archivo de Drive, pestaña "Liquidación").
@@ -877,6 +891,7 @@ function convertForDisplay(key, value){
 const CROPS = {
   soja: {
     get data(){ return SOJA_DATA; },
+    get raw(){ return SOJA_RAW; },
     color: '#1f6b3a',
     saldoField: 'a_fijar_1',
     saldoPctField: 'a_fijar_2',
@@ -891,6 +906,7 @@ const CROPS = {
   },
   maiz: {
     get data(){ return MAIZ_DATA; },
+    get raw(){ return MAIZ_RAW; },
     color: '#b8862c',
     saldoField: 'saldo_fijar_1',
     saldoPctField: 'saldo_fijar_2',
@@ -905,6 +921,7 @@ const CROPS = {
   },
   trigo: {
     get data(){ return TRIGO_DATA; },
+    get raw(){ return TRIGO_RAW; },
     color: '#9c3b26',
     saldoField: 'saldo_fijar_1',
     saldoPctField: 'saldo_fijar_2',
@@ -984,42 +1001,98 @@ function average(values){
   return valid.reduce((s,v) => s+v, 0) / valid.length;
 }
 
+const monthAbbrev = (mesAno) => String(mesAno || '').split('-')[0];
+
+function campaignsSortedDesc(allRows){
+  const set = new Set(allRows.map(r => r.campaña));
+  return Array.from(set).sort((a, b) => campKey(b) - campKey(a));
+}
+
+function rowsForCampaign(allRows, camp){
+  return allRows.filter(r => r.campaña === camp);
+}
+
+function rawValueByMonth(rows, metric){
+  // usa la primera ocurrencia cronológica de cada mes: algunas campañas repiten
+  // la etiqueta de un mes al cierre del ciclo (ej. "Mar" de arranque y otro "Mar"
+  // de cola un año después); la primera es la que corresponde a esa posición real.
+  const map = {};
+  rows.forEach(r => {
+    const key = monthAbbrev(r.mes_ano);
+    if (!(key in map)) map[key] = r[metric];
+  });
+  return map;
+}
+
 function renderProgressChart(cropKey){
   const cfg = CROPS[cropKey];
   const metric = activeMetric.progress[cropKey];
-  const currentCampaign = cfg.data[cfg.data.length-1].campaña;
-  // todas las filas de la campaña actual = progresión cronológica de la campaña en curso
-  const rows = cfg.data.filter(r => r.campaña === currentCampaign);
-  const labels = rows.map(r => r.mes_ano);
-  const values = rows.map(r => convertForDisplay(metric, r[metric]));
-  const avg = average(values);
+  const allRows = (cfg.raw && cfg.raw.length) ? cfg.raw : cfg.data;
+  const campaigns = campaignsSortedDesc(allRows);
+  const currentCampaign = campaigns[0];
+  const previousCampaign = campaigns[1] || null;
+  const avgCampaigns = campaigns.slice(1, 6); // hasta las 5 campañas previas completas
+
+  const currentRows = rowsForCampaign(allRows, currentCampaign)
+    .slice()
+    .sort((a, b) => new Date(a.fecha_info) - new Date(b.fecha_info));
+  const labels = currentRows.map(r => monthAbbrev(r.mes_ano));
+  const currentValues = currentRows.map(r => convertForDisplay(metric, r[metric]));
+
+  const prevMap = previousCampaign ? rawValueByMonth(rowsForCampaign(allRows, previousCampaign), metric) : {};
+  const prevValues = labels.map(m => prevMap.hasOwnProperty(m) ? convertForDisplay(metric, prevMap[m]) : null);
+
+  const avgMaps = avgCampaigns.map(c => rawValueByMonth(rowsForCampaign(allRows, c), metric));
+  const avgValues = labels.map(m => {
+    const raws = avgMaps.map(map => map[m]).filter(v => v !== null && v !== undefined && !isNaN(v));
+    if (!raws.length) return null;
+    const converted = raws.map(v => convertForDisplay(metric, v)).filter(v => v !== null);
+    if (!converted.length) return null;
+    return converted.reduce((s, v) => s + v, 0) / converted.length;
+  });
 
   const ctxId = `${cropKey}-chart-progress`;
   const ctx = document.getElementById(ctxId).getContext('2d');
   if (chartInstances[ctxId]) chartInstances[ctxId].destroy();
 
   const datasets = [{
-    label: metricLabel(cropKey, metric),
-    data: values,
+    label: `Campaña ${currentCampaign}`,
+    data: currentValues,
     borderColor: cfg.color,
     backgroundColor: cfg.color + '14',
     fill:true,
     tension:0.3,
     pointRadius:4,
     pointBackgroundColor: cfg.color,
-    order:2
+    borderWidth:2.5,
+    order:3
   }];
 
-  if (avg !== null){
+  if (previousCampaign){
     datasets.push({
-      label:'Promedio',
-      data: labels.map(() => avg),
+      label: `Campaña ${previousCampaign}`,
+      data: prevValues,
+      borderColor: cfg.color + '80',
+      backgroundColor: 'transparent',
+      fill:false,
+      tension:0.3,
+      pointRadius:3,
+      borderDash:[3,2],
+      order:2
+    });
+  }
+
+  if (avgCampaigns.length){
+    datasets.push({
+      label: `Promedio últimos ${avgCampaigns.length} años`,
+      data: avgValues,
       borderColor:'#8a9a95',
+      backgroundColor:'transparent',
       borderDash:[6,4],
       borderWidth:1.5,
       pointRadius:0,
       fill:false,
-      tension:0,
+      tension:0.3,
       order:1
     });
   }
@@ -1027,7 +1100,7 @@ function renderProgressChart(cropKey){
   chartInstances[ctxId] = new Chart(ctx, {
     type:'line',
     data:{ labels, datasets },
-    options: chartOptions(`Campaña ${currentCampaign}`, {beginAtZero:true, showLegend: avg !== null})
+    options: chartOptions(`Campaña ${currentCampaign} vs. campaña anterior y promedio histórico`, {beginAtZero:true, showLegend:true})
   });
 }
 
