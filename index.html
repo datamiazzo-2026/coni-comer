@@ -486,18 +486,18 @@
     <div class="cards" id="soja-cards"></div>
 
     <div class="chart-section" style="--tab-accent:var(--accent-soja)">
-      <h2>Evolución dentro de la campaña actual</h2>
-      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
-      <div class="metric-select" id="soja-metric-progress"></div>
-      <div class="chart-wrap"><canvas id="soja-chart-progress"></canvas></div>
-      <div class="chart-source">Fuente: MAGYP</div>
-    </div>
-
-    <div class="chart-section" style="--tab-accent:var(--accent-soja)">
       <h2>Campaña actual vs. campañas anteriores</h2>
       <div class="desc">Comparación al mismo corte de junio de cada campaña, desde 18/19 hasta 25/26.</div>
       <div class="metric-select" id="soja-metric-history"></div>
       <div class="chart-wrap"><canvas id="soja-chart-history"></canvas></div>
+      <div class="chart-source">Fuente: MAGYP</div>
+    </div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-soja)">
+      <h2>Evolución dentro de la campaña actual</h2>
+      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
+      <div class="metric-select" id="soja-metric-progress"></div>
+      <div class="chart-wrap"><canvas id="soja-chart-progress"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
     </div>
   </section>
@@ -511,18 +511,18 @@
     <div class="cards" id="maiz-cards"></div>
 
     <div class="chart-section" style="--tab-accent:var(--accent-maiz)">
-      <h2>Evolución dentro de la campaña actual</h2>
-      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
-      <div class="metric-select" id="maiz-metric-progress"></div>
-      <div class="chart-wrap"><canvas id="maiz-chart-progress"></canvas></div>
-      <div class="chart-source">Fuente: MAGYP</div>
-    </div>
-
-    <div class="chart-section" style="--tab-accent:var(--accent-maiz)">
       <h2>Campaña actual vs. campañas anteriores</h2>
       <div class="desc">Comparación al mismo corte de junio de cada campaña, desde 18/19 hasta 25/26.</div>
       <div class="metric-select" id="maiz-metric-history"></div>
       <div class="chart-wrap"><canvas id="maiz-chart-history"></canvas></div>
+      <div class="chart-source">Fuente: MAGYP</div>
+    </div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-maiz)">
+      <h2>Evolución dentro de la campaña actual</h2>
+      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
+      <div class="metric-select" id="maiz-metric-progress"></div>
+      <div class="chart-wrap"><canvas id="maiz-chart-progress"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
     </div>
   </section>
@@ -536,18 +536,18 @@
     <div class="cards" id="trigo-cards"></div>
 
     <div class="chart-section" style="--tab-accent:var(--accent-trigo)">
-      <h2>Evolución dentro de la campaña actual</h2>
-      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
-      <div class="metric-select" id="trigo-metric-progress"></div>
-      <div class="chart-wrap"><canvas id="trigo-chart-progress"></canvas></div>
-      <div class="chart-source">Fuente: MAGYP</div>
-    </div>
-
-    <div class="chart-section" style="--tab-accent:var(--accent-trigo)">
       <h2>Campaña actual vs. campañas anteriores</h2>
       <div class="desc">Comparación al mismo corte de junio de cada campaña, desde 19/20 hasta 25/26.</div>
       <div class="metric-select" id="trigo-metric-history"></div>
       <div class="chart-wrap"><canvas id="trigo-chart-history"></canvas></div>
+      <div class="chart-source">Fuente: MAGYP</div>
+    </div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-trigo)">
+      <h2>Evolución dentro de la campaña actual</h2>
+      <div class="desc">Progreso mensual de la comercialización, campaña 25/26 (Nov–Jun).</div>
+      <div class="metric-select" id="trigo-metric-progress"></div>
+      <div class="chart-wrap"><canvas id="trigo-chart-progress"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
     </div>
   </section>
@@ -582,8 +582,9 @@
 <script>
 /* =========================================================
    DATOS — extraídos de Comercialización.xlsx (Google Drive)
-   Unidades: producción / comprado / saldo / queda en miles de toneladas (tal cual la fuente),
+   Unidades en la fuente: producción / comprado / saldo / queda en miles de toneladas,
    pct_comprado y *_2 en %, precio en USD/tn, queda_vender_musd en millones de USD.
+   Para mostrar, los campos de toneladas se convierten a millones (TON_METRICS, /1000).
    ========================================================= */
 
 const SOJA_DATA = [
@@ -669,6 +670,14 @@ if (window.Chart) {
   Chart.defaults.color = '#4d5f59';
 }
 
+// Campos que están en la fuente en MILES de toneladas y se muestran en MILLONES (/1000)
+const TON_METRICS = ['produccion','total_comprado','a_fijar_1','saldo_fijar_1','queda_vender_tn'];
+
+function convertForDisplay(key, value){
+  if (value === null || value === undefined || isNaN(value)) return null;
+  return TON_METRICS.includes(key) ? value/1000 : value;
+}
+
 const CROPS = {
   soja: {
     data: SOJA_DATA,
@@ -676,12 +685,12 @@ const CROPS = {
     saldoField: 'a_fijar_1',
     saldoPctField: 'a_fijar_2',
     metrics: [
-      {key:'produccion', label:'Producción (mil tn)'},
+      {key:'produccion', label:'Producción (mill. tn)'},
       {key:'pct_comprado', label:'% Comercializado'},
-      {key:'total_comprado', label:'Total comprado (mil tn)'},
-      {key:'a_fijar_1', label:'Saldo a fijar (mil tn)'},
-      {key:'queda_vender_tn', label:'Queda por vender (mil tn)'},
-      {key:'precio', label:'Precio (USD/tn)'}
+      {key:'total_comprado', label:'Total comprado (mill. tn)'},
+      {key:'a_fijar_1', label:'Saldo a fijar (mill. tn)'},
+      {key:'queda_vender_tn', label:'Queda por vender (mill. tn)'},
+      {key:'queda_vender_musd', label:'Queda por vender (USD M)'}
     ]
   },
   maiz: {
@@ -690,12 +699,12 @@ const CROPS = {
     saldoField: 'saldo_fijar_1',
     saldoPctField: 'saldo_fijar_2',
     metrics: [
-      {key:'produccion', label:'Producción (mil tn)'},
+      {key:'produccion', label:'Producción (mill. tn)'},
       {key:'pct_comprado', label:'% Comercializado'},
-      {key:'total_comprado', label:'Total comprado (mil tn)'},
-      {key:'saldo_fijar_1', label:'Saldo a fijar (mil tn)'},
-      {key:'queda_vender_tn', label:'Queda por vender (mil tn)'},
-      {key:'precio', label:'Precio (USD/tn)'}
+      {key:'total_comprado', label:'Total comprado (mill. tn)'},
+      {key:'saldo_fijar_1', label:'Saldo a fijar (mill. tn)'},
+      {key:'queda_vender_tn', label:'Queda por vender (mill. tn)'},
+      {key:'queda_vender_musd', label:'Queda por vender (USD M)'}
     ]
   },
   trigo: {
@@ -704,12 +713,12 @@ const CROPS = {
     saldoField: 'saldo_fijar_1',
     saldoPctField: 'saldo_fijar_2',
     metrics: [
-      {key:'produccion', label:'Producción (mil tn)'},
+      {key:'produccion', label:'Producción (mill. tn)'},
       {key:'pct_comprado', label:'% Comercializado'},
-      {key:'total_comprado', label:'Total comprado (mil tn)'},
-      {key:'saldo_fijar_1', label:'Saldo a fijar (mil tn)'},
-      {key:'queda_vender_tn', label:'Queda por vender (mil tn)'},
-      {key:'precio', label:'Precio (USD/tn)'}
+      {key:'total_comprado', label:'Total comprado (mill. tn)'},
+      {key:'saldo_fijar_1', label:'Saldo a fijar (mill. tn)'},
+      {key:'queda_vender_tn', label:'Queda por vender (mill. tn)'},
+      {key:'queda_vender_musd', label:'Queda por vender (USD M)'}
     ]
   }
 };
@@ -733,11 +742,11 @@ function buildCards(cropKey){
   notaEl.textContent = last.note ? last.note : '';
 
   const cards = [
-    {label:'Producción', value:`${numFmt(last.produccion)}`, sub:'mil tn', accent:true},
+    {label:'Producción', value:`${numFmt(last.produccion/1000,2)}`, sub:'mill. tn', accent:true},
     {label:'% Comercializado', value:`${numFmt(last.pct_comprado)}%`, sub:'sobre producción'},
-    {label:'Total comprado', value:numFmt(last.total_comprado,1), sub:'mil tn'},
-    {label:'Saldo a fijar', value:numFmt(last[cfg.saldoField],1), sub:`mil tn (${numFmt(last[cfg.saldoPctField])}% del comprado)`},
-    {label:'Queda por vender', value:numFmt(last.queda_vender_tn), sub:'mil tn'},
+    {label:'Total comprado', value:numFmt(last.total_comprado/1000,2), sub:'mill. tn'},
+    {label:'Saldo a fijar', value:numFmt(last[cfg.saldoField]/1000,2), sub:`mill. tn (${numFmt(last[cfg.saldoPctField])}% del comprado)`},
+    {label:'Queda por vender', value:numFmt(last.queda_vender_tn/1000,2), sub:'mill. tn'},
     {label:'Queda por vender', value: last.queda_vender_musd ? `US$ ${numFmt(last.queda_vender_musd)} M` : '—', sub:'valorizado'}
   ];
 
@@ -773,6 +782,12 @@ function metricLabel(cropKey, key){
   return CROPS[cropKey].metrics.find(m => m.key === key)?.label || key;
 }
 
+function average(values){
+  const valid = values.filter(v => v !== null && v !== undefined && !isNaN(v));
+  if (!valid.length) return null;
+  return valid.reduce((s,v) => s+v, 0) / valid.length;
+}
+
 function renderProgressChart(cropKey){
   const cfg = CROPS[cropKey];
   const metric = activeMetric.progress[cropKey];
@@ -780,28 +795,41 @@ function renderProgressChart(cropKey){
   // últimos 8 registros = progresión cronológica de la campaña en curso (Nov -> Jun)
   const rows = cfg.data.slice(-8);
   const labels = rows.map(r => r.mes_ano);
-  const values = rows.map(r => r[metric]);
+  const values = rows.map(r => convertForDisplay(metric, r[metric]));
+  const avg = average(values);
 
   const ctxId = `${cropKey}-chart-progress`;
   const ctx = document.getElementById(ctxId).getContext('2d');
   if (chartInstances[ctxId]) chartInstances[ctxId].destroy();
 
+  const datasets = [{
+    label: metricLabel(cropKey, metric),
+    data: values,
+    borderColor: cfg.color,
+    backgroundColor: cfg.color + '14',
+    fill:true,
+    tension:0.3,
+    pointRadius:4,
+    pointBackgroundColor: cfg.color
+  }];
+
+  if (avg !== null){
+    datasets.push({
+      label:'Promedio',
+      data: labels.map(() => avg),
+      borderColor:'#8a9a95',
+      borderDash:[6,4],
+      borderWidth:1.5,
+      pointRadius:0,
+      fill:false,
+      tension:0
+    });
+  }
+
   chartInstances[ctxId] = new Chart(ctx, {
     type:'line',
-    data:{
-      labels,
-      datasets:[{
-        label: metricLabel(cropKey, metric),
-        data: values,
-        borderColor: cfg.color,
-        backgroundColor: cfg.color + '14',
-        fill:true,
-        tension:0.3,
-        pointRadius:4,
-        pointBackgroundColor: cfg.color
-      }]
-    },
-    options: chartOptions(`Campaña ${currentCampaign}`)
+    data:{ labels, datasets },
+    options: chartOptions(`Campaña ${currentCampaign}`, {beginAtZero:true, showLegend: avg !== null})
   });
 }
 
@@ -811,34 +839,56 @@ function renderHistoryChart(cropKey){
   // una fila por campaña, tomando el corte de junio de cada año (comparable entre campañas)
   const rows = cfg.data.filter(r => r.mes_ano.startsWith('Jun'));
   const labels = rows.map(r => r.campaña);
-  const values = rows.map(r => r[metric]);
+  const values = rows.map(r => convertForDisplay(metric, r[metric]));
   const colors = rows.map((r,i) => i === rows.length-1 ? cfg.color : cfg.color + '55');
+  const avg = average(values);
 
   const ctxId = `${cropKey}-chart-history`;
   const ctx = document.getElementById(ctxId).getContext('2d');
   if (chartInstances[ctxId]) chartInstances[ctxId].destroy();
 
+  const datasets = [{
+    label: metricLabel(cropKey, metric),
+    data: values,
+    backgroundColor: colors,
+    borderRadius:4,
+    order:2
+  }];
+
+  if (avg !== null){
+    datasets.push({
+      type:'line',
+      label:'Promedio',
+      data: labels.map(() => avg),
+      borderColor:'#8a9a95',
+      borderDash:[6,4],
+      borderWidth:1.5,
+      pointRadius:0,
+      fill:false,
+      tension:0,
+      order:1
+    });
+  }
+
   chartInstances[ctxId] = new Chart(ctx, {
     type:'bar',
-    data:{
-      labels,
-      datasets:[{
-        label: metricLabel(cropKey, metric),
-        data: values,
-        backgroundColor: colors,
-        borderRadius:4
-      }]
-    },
-    options: chartOptions('Corte a fin de junio de cada campaña')
+    data:{ labels, datasets },
+    options: chartOptions('Corte a fin de junio de cada campaña', {beginAtZero:true, showLegend: avg !== null})
   });
 }
 
-function chartOptions(subtitle){
+function chartOptions(subtitle, opts={}){
+  const { beginAtZero=false, showLegend=false } = opts;
   return {
     responsive:true,
     maintainAspectRatio:false,
     plugins:{
-      legend:{ display:false },
+      legend:{
+        display: showLegend,
+        position:'top',
+        align:'end',
+        labels:{boxWidth:12, color:'#4d5f59', font:{size:11}}
+      },
       tooltip:{
         backgroundColor:'#ffffff',
         titleColor:'#16241f',
@@ -867,7 +917,7 @@ function chartOptions(subtitle){
         ticks:{color:'#8a9a95'},
         grid:{color:'#eef1ef', drawTicks:false},
         border:{display:false},
-        beginAtZero:false
+        beginAtZero
       }
     }
   };
