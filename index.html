@@ -810,7 +810,8 @@ function renderProgressChart(cropKey){
     fill:true,
     tension:0.3,
     pointRadius:4,
-    pointBackgroundColor: cfg.color
+    pointBackgroundColor: cfg.color,
+    order:2
   }];
 
   if (avg !== null){
@@ -822,7 +823,8 @@ function renderProgressChart(cropKey){
       borderWidth:1.5,
       pointRadius:0,
       fill:false,
-      tension:0
+      tension:0,
+      order:1
     });
   }
 
