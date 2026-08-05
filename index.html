@@ -217,6 +217,8 @@
     border-color:var(--tab-accent, var(--brand));
   }
   .chart-wrap{ position:relative; height:340px; }
+  .chart-wrap-tall{ height:420px; }
+  .desc-compact{ font-size:0.7rem; margin-bottom:10px; }
   .chart-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -495,9 +497,9 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-soja)">
       <h2>Evolución dentro de la campaña actual</h2>
-      <div class="desc">Progreso mensual de la comercialización: campaña actual vs. campaña anterior y promedio de los últimos 5 años, por mes de campaña.</div>
+      <div class="desc desc-compact">Campaña actual vs. campaña anterior y promedio de los últimos 5 años, por mes de campaña.</div>
       <div class="metric-select" id="soja-metric-progress"></div>
-      <div class="chart-wrap"><canvas id="soja-chart-progress"></canvas></div>
+      <div class="chart-wrap chart-wrap-tall"><canvas id="soja-chart-progress"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
     </div>
   </section>
@@ -520,9 +522,9 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-maiz)">
       <h2>Evolución dentro de la campaña actual</h2>
-      <div class="desc">Progreso mensual de la comercialización: campaña actual vs. campaña anterior y promedio de los últimos 5 años, por mes de campaña.</div>
+      <div class="desc desc-compact">Campaña actual vs. campaña anterior y promedio de los últimos 5 años, por mes de campaña.</div>
       <div class="metric-select" id="maiz-metric-progress"></div>
-      <div class="chart-wrap"><canvas id="maiz-chart-progress"></canvas></div>
+      <div class="chart-wrap chart-wrap-tall"><canvas id="maiz-chart-progress"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
     </div>
   </section>
@@ -545,9 +547,9 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-trigo)">
       <h2>Evolución dentro de la campaña actual</h2>
-      <div class="desc">Progreso mensual de la comercialización: campaña actual vs. campaña anterior y promedio de los últimos 5 años, por mes de campaña.</div>
+      <div class="desc desc-compact">Campaña actual vs. campaña anterior y promedio de los últimos 5 años, por mes de campaña.</div>
       <div class="metric-select" id="trigo-metric-progress"></div>
-      <div class="chart-wrap"><canvas id="trigo-chart-progress"></canvas></div>
+      <div class="chart-wrap chart-wrap-tall"><canvas id="trigo-chart-progress"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
     </div>
   </section>
@@ -567,8 +569,8 @@
     </div>
 
     <div class="chart-section" style="--tab-accent:var(--accent-liquidacion)">
-      <h2>Acumulado Enero-Junio por año</h2>
-      <div class="desc">Cuánto se liquidó entre enero y junio de cada año, para comparar el arranque de 2026 contra campañas anteriores.</div>
+      <h2 id="liquidacion-acumulado-title">Acumulado por año</h2>
+      <div class="desc" id="liquidacion-acumulado-desc">Cuánto se liquidó desde enero hasta la fecha, para cada año.</div>
       <div class="chart-wrap"><canvas id="liquidacion-chart-acumulado"></canvas></div>
       <div class="chart-source">Fuente: CIARA-CEC</div>
     </div>
@@ -727,8 +729,8 @@ function parseLiquidacion(text){
   const MES_LABELS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const mensual = {};
   const totalAnual = {};
-  const acumuladoEneJun = {};
 
+  // 1) Totales mensuales y anuales
   rows.forEach(cols => {
     const label = (cols[1] || '').trim();
     const monthIdx = MES_LABELS.findIndex(m => m.toLowerCase() === label.toLowerCase());
@@ -745,11 +747,37 @@ function parseLiquidacion(text){
         const val = parseArgNumber(cols[col]);
         if (val !== null) totalAnual[year] = Math.round((val / 1e6) * 10) / 10;
       }
-    } else if (label === 'Ene-Jun'){
+    }
+  });
+
+  // 2) Detectar dinámicamente hasta qué mes hay datos cargados en el año más reciente.
+  //    Importante: NO hardcodear "hasta junio" acá — la hoja va sumando meses a medida
+  //    que avanza el año (ver "Total liquidacion del mes de"), así que el período
+  //    acumulado (y sus textos en pantalla) se recalculan solos cada vez que haya
+  //    un mes nuevo cargado, sin tocar código.
+  const yearsWithData = Object.keys(mensual).map(Number);
+  const latestYear = yearsWithData.length ? Math.max(...yearsWithData) : null;
+  let cutoffIdx = 5; // resguardo si no se puede detectar: Junio
+  if (latestYear !== null){
+    for (let m = 11; m >= 0; m--){
+      if (mensual[latestYear][m] !== null && mensual[latestYear][m] !== undefined){ cutoffIdx = m; break; }
+    }
+  }
+  const CUM_ROW_LABELS = ['Ene','Ene-Feb','Ene-Mar','Ene-Abr','Ene-May','Ene-Jun','Ene-Jul','Ene-Ago','Ene-Sep','Ene-Oct','Ene-Nov','Anual'];
+  const acumuladoShortLabel = CUM_ROW_LABELS[cutoffIdx];
+  const acumuladoLabel = cutoffIdx === 11 ? 'Enero-Diciembre' : `Enero-${MES_LABELS[cutoffIdx]}`;
+  const cutoffMonthName = MES_LABELS[cutoffIdx];
+
+  // 3) Leer la fila "Acumulado" de la hoja que corresponde a ese corte (la hoja ya trae
+  //    una fila por cada rango Ene-X, con el histórico completo para todos los años).
+  const acumulado = {};
+  rows.forEach(cols => {
+    const label = (cols[1] || '').trim();
+    if (label === acumuladoShortLabel){
       for (let col = 2; col <= 26; col++){
         const year = col + 2000;
         const val = parseArgNumber(cols[col]);
-        if (val !== null) acumuladoEneJun[year] = Math.round(val * 10) / 10;
+        if (val !== null) acumulado[year] = Math.round(val * 10) / 10;
       }
     }
   });
@@ -757,7 +785,11 @@ function parseLiquidacion(text){
   return {
     meses: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
     mensual,
-    acumuladoEneJun,
+    acumulado,
+    acumuladoLabel,
+    acumuladoShortLabel,
+    cutoffMonthIdx: cutoffIdx,
+    cutoffMonthName,
     totalAnual
   };
 }
@@ -853,19 +885,27 @@ let TRIGO_RAW = TRIGO_DATA;
 /* =========================================================
    LIQUIDACIÓN DE DIVISAS — respaldo, extraído de la hoja CIARA-CEC
    (mismo archivo de Drive, pestaña "Liquidación").
-   Valores en USD millones. 2026 solo tiene datos hasta junio.
+   Valores en USD millones. 2026 tiene datos hasta julio (último mes cargado
+   en la hoja a la fecha de este respaldo). El período acumulado ("acumulado",
+   más abajo) se recalcula en vivo según el último mes disponible — ver
+   parseLiquidacion() — así que este respaldo NO debe quedar hardcodeado en
+   "Ene-Jun" cuando la hoja avance a meses siguientes.
    ========================================================= */
 let LIQUIDACION_DATA = {
   meses: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
   mensual: {
     2024: [1522.4,1499.3,1501.8,1909.9,2612.6,1977.9,2616.2,2451.5,2480.5,2553.2,1999.2,1966.1],
     2025: [2073.5,2181.3,1879.8,2524.4,3054.2,3706.4,4102.0,1817.8,7107.9,1116.8,759.7,1015.0],
-    2026: [1850.8,1289.2,2032.5,2494.5,2676.8,3007.7,null,null,null,null,null,null]
+    2026: [1850.8,1289.2,2032.5,2494.5,2676.8,3007.7,2918.1,null,null,null,null,null]
   },
-  // Acumulado corrido Enero-Junio de cada año (USD millones)
-  acumuladoEneJun: {
-    2019:10359, 2020:9307, 2021:16660, 2022:19145, 2023:11032, 2024:11024, 2025:15420, 2026:13351
+  // Acumulado corrido Enero-Julio de cada año (USD millones) — corte vigente al momento de este respaldo
+  acumulado: {
+    2019:12613, 2020:11603, 2021:20179, 2022:22309, 2023:12957, 2024:13640, 2025:19522, 2026:16270
   },
+  acumuladoLabel: 'Enero-Julio',
+  acumuladoShortLabel: 'Ene-Jul',
+  cutoffMonthIdx: 6,
+  cutoffMonthName: 'Julio',
   // Total del año completo, como referencia (USD millones) — 2026 no incluido por estar incompleto
   totalAnual: {
     2019:23359, 2020:20274, 2021:32808, 2022:40438, 2023:19742, 2024:25091, 2025:31339
@@ -1185,7 +1225,7 @@ function chartOptions(subtitle, opts={}){
         border:{color:'#e1e6e2'}
       },
       y:{
-        ticks:{color:'#8a9a95'},
+        ticks:{color:'#8a9a95', callback:(v) => Number(v).toLocaleString('es-AR')},
         grid:{color:'#eef1ef', drawTicks:false},
         border:{display:false},
         beginAtZero
@@ -1206,23 +1246,37 @@ function buildLiquidacionCards(){
   const d = LIQUIDACION_DATA;
   const container = document.getElementById('liquidacion-cards');
 
-  const junio2026 = d.mensual[2026] ? d.mensual[2026][5] : null;
-  const junio2025 = d.mensual[2025] ? d.mensual[2025][5] : null;
-  const junioVar = pctChange(junio2026, junio2025);
+  // Todo lo de acá abajo se deriva del último mes con datos cargados (d.cutoffMonthIdx /
+  // d.cutoffMonthName / d.acumuladoShortLabel), calculado en parseLiquidacion(). No hardcodear
+  // años ni meses puntuales acá: si la hoja suma un mes nuevo, estas tarjetas se actualizan solas.
+  const mIdx = d.cutoffMonthIdx ?? 5;
+  const mesNombre = d.cutoffMonthName || 'Junio';
+  const mesAbrev = (d.meses && d.meses[mIdx]) || mesNombre.slice(0,3);
+  const shortLabel = d.acumuladoShortLabel || 'Ene-Jun';
+  const acumulado = d.acumulado || {};
 
-  const acum2026 = d.acumuladoEneJun[2026];
-  const acum2025 = d.acumuladoEneJun[2025];
-  const acumVar = pctChange(acum2026, acum2025);
+  const years = Object.keys(d.mensual || {}).map(Number);
+  const latestYear = years.length ? Math.max(...years) : null;
+  const priorYear = latestYear !== null ? latestYear - 1 : null;
 
-  const anosPrevios = [2019,2020,2021,2022,2023,2024,2025].filter(y => d.acumuladoEneJun[y] !== undefined);
-  const promedioAcumHist = anosPrevios.length ? anosPrevios.reduce((s,y) => s + d.acumuladoEneJun[y], 0) / anosPrevios.length : null;
-  const acumVsPromedio = pctChange(acum2026, promedioAcumHist);
+  const cierreActual = (latestYear !== null && d.mensual[latestYear]) ? d.mensual[latestYear][mIdx] : null;
+  const cierrePrior = (priorYear !== null && d.mensual[priorYear]) ? d.mensual[priorYear][mIdx] : null;
+  const cierreVar = pctChange(cierreActual, cierrePrior);
+
+  const acumActual = latestYear !== null ? acumulado[latestYear] : undefined;
+  const acumPrior = priorYear !== null ? acumulado[priorYear] : undefined;
+  const acumVar = pctChange(acumActual ?? null, acumPrior ?? null);
+
+  const anosPrevios = Object.keys(acumulado).map(Number).filter(y => latestYear === null || y < latestYear).sort((a,b)=>a-b);
+  const promedioAcumHist = anosPrevios.length ? anosPrevios.reduce((s,y) => s + acumulado[y], 0) / anosPrevios.length : null;
+  const acumVsPromedio = pctChange(acumActual ?? null, promedioAcumHist);
+  const rangoHist = anosPrevios.length ? `${anosPrevios[0]}-${anosPrevios[anosPrevios.length-1]}` : '—';
 
   const cards = [
-    {label:'Liquidado en Junio 2026', value: junio2026 !== null ? `US$ ${numFmt(junio2026)} M` : '—', sub: junioVar !== null ? `${junioVar>=0?'+':''}${numFmt(junioVar,1)}% vs. Jun-25` : '—', accent:true},
-    {label:'Acumulado Ene-Jun 2026', value: acum2026 !== undefined ? `US$ ${numFmt(acum2026)} M` : '—', sub: acumVar !== null ? `${acumVar>=0?'+':''}${numFmt(acumVar,1)}% vs. mismo período 2025` : '—'},
-    {label:'Promedio histórico Ene-Jun', value: promedioAcumHist !== null ? `US$ ${numFmt(promedioAcumHist)} M` : '—', sub:'2019-2025 · 2026 va ' + (acumVsPromedio!==null ? ((acumVsPromedio>=0?'+':'') + numFmt(acumVsPromedio,1) + '% vs. ese promedio') : '—')},
-    {label:'Total liquidado 2025', value: d.totalAnual[2025] !== undefined ? `US$ ${numFmt(d.totalAnual[2025])} M` : '—', sub:'año completo, referencia'}
+    {label:`Liquidado en ${mesNombre}${latestYear!==null?' '+latestYear:''}`, value: cierreActual !== null && cierreActual !== undefined ? `US$ ${numFmt(cierreActual)} M` : '—', sub: cierreVar !== null ? `${cierreVar>=0?'+':''}${numFmt(cierreVar,1)}% vs. ${mesAbrev}-${priorYear!==null?String(priorYear).slice(2):''}` : '—', accent:true},
+    {label:`Acumulado ${shortLabel}${latestYear!==null?' '+latestYear:''}`, value: acumActual !== undefined ? `US$ ${numFmt(acumActual)} M` : '—', sub: acumVar !== null ? `${acumVar>=0?'+':''}${numFmt(acumVar,1)}% vs. mismo período ${priorYear!==null?priorYear:''}` : '—'},
+    {label:`Promedio histórico ${shortLabel}`, value: promedioAcumHist !== null ? `US$ ${numFmt(promedioAcumHist)} M` : '—', sub:`${rangoHist} · ${latestYear!==null?latestYear:''} va ` + (acumVsPromedio!==null ? ((acumVsPromedio>=0?'+':'') + numFmt(acumVsPromedio,1) + '% vs. ese promedio') : '—')},
+    {label:`Total liquidado ${priorYear!==null?priorYear:''}`, value: (priorYear !== null && d.totalAnual[priorYear] !== undefined) ? `US$ ${numFmt(d.totalAnual[priorYear])} M` : '—', sub:'año completo, referencia'}
   ];
 
   container.innerHTML = cards.map(c => `
@@ -1290,11 +1344,21 @@ function renderLiquidacionMensualChart(){
 function renderLiquidacionAcumuladoChart(){
   const d = LIQUIDACION_DATA;
   const color = '#2f6690';
-  const years = Object.keys(d.acumuladoEneJun).map(Number).sort();
+  const acumulado = d.acumulado || {};
+  const shortLabel = d.acumuladoShortLabel || 'Ene-Jun';
+  const longLabel = d.acumuladoLabel || 'Enero-Junio';
+  const years = Object.keys(acumulado).map(Number).sort((a,b)=>a-b);
   const labels = years.map(String);
-  const values = years.map(y => d.acumuladoEneJun[y]);
-  const maxYear = Math.max(...years);
+  const values = years.map(y => acumulado[y]);
+  const maxYear = years.length ? Math.max(...years) : null;
   const colors = years.map(y => y === maxYear ? color : color + '55');
+
+  // Título y bajada de este gráfico se arman con el período detectado en vivo
+  // (ver parseLiquidacion) para que no queden desactualizados si la hoja avanza de mes.
+  const titleEl = document.getElementById('liquidacion-acumulado-title');
+  const descEl = document.getElementById('liquidacion-acumulado-desc');
+  if (titleEl) titleEl.textContent = `Acumulado ${longLabel} por año`;
+  if (descEl) descEl.textContent = `Cuánto se liquidó entre enero y ${(d.cutoffMonthName || 'junio').toLowerCase()} de cada año.`;
 
   const ctxId = 'liquidacion-chart-acumulado';
   const ctx = document.getElementById(ctxId).getContext('2d');
@@ -1305,13 +1369,13 @@ function renderLiquidacionAcumuladoChart(){
     data:{
       labels,
       datasets:[{
-        label:'Acumulado Ene-Jun (USD millones)',
+        label:`Acumulado ${shortLabel} (USD millones)`,
         data: values,
         backgroundColor: colors,
         borderRadius:4
       }]
     },
-    options: chartOptions('Acumulado enero-junio, en USD millones')
+    options: chartOptions(`Acumulado ${longLabel.toLowerCase()}, en USD millones`)
   });
 }
 
