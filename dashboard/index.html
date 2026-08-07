@@ -511,7 +511,7 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-soja)">
       <h2>Campaña actual vs. campañas anteriores</h2>
-      <div class="desc">Comparación al mismo corte de junio de cada campaña, desde 18/19 hasta 25/26.</div>
+            <div class="desc" id="soja-history-desc">Comparación al mismo corte de junio de cada campaña, desde 18/19 hasta 25/26.</div>
       <div class="metric-select" id="soja-metric-history"></div>
       <div class="chart-wrap"><canvas id="soja-chart-history"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
@@ -536,7 +536,7 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-maiz)">
       <h2>Campaña actual vs. campañas anteriores</h2>
-      <div class="desc">Comparación al mismo corte de junio de cada campaña, desde 18/19 hasta 25/26.</div>
+            <div class="desc" id="maiz-history-desc">Comparación al mismo corte de junio de cada campaña, desde 18/19 hasta 25/26.</div>
       <div class="metric-select" id="maiz-metric-history"></div>
       <div class="chart-wrap"><canvas id="maiz-chart-history"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
@@ -561,7 +561,7 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-trigo)">
       <h2>Campaña actual vs. campañas anteriores</h2>
-      <div class="desc">Comparación al mismo corte de junio de cada campaña, desde 19/20 hasta 25/26.</div>
+            <div class="desc" id="trigo-history-desc">Comparación al mismo corte de junio de cada campaña, desde 19/20 hasta 25/26.</div>
       <div class="metric-select" id="trigo-metric-history"></div>
       <div class="chart-wrap"><canvas id="trigo-chart-history"></canvas></div>
       <div class="chart-source">Fuente: MAGYP</div>
@@ -652,6 +652,7 @@ function parseArgNumber(raw){
 }
 
 const MES_MAP = {ene:'Jan', feb:'Feb', mar:'Mar', abr:'Apr', may:'May', jun:'Jun', jul:'Jul', ago:'Aug', sep:'Sep', oct:'Oct', nov:'Nov', dic:'Dec'};
+const MES_NOMBRE_ES = {Jan:'enero', Feb:'febrero', Mar:'marzo', Apr:'abril', May:'mayo', Jun:'junio', Jul:'julio', Aug:'agosto', Sep:'septiembre', Oct:'octubre', Nov:'noviembre', Dec:'diciembre'};
 function convertMesAno(raw){
   const s = String(raw || '').trim().toLowerCase();
   const m = s.match(/^([a-záéíóúñ]+)-(\d{2})$/i);
@@ -709,9 +710,14 @@ function buildCropSeries(allRows){
   let current = allRows[0].campaña;
   allRows.forEach(r => { if (campKey(r.campaña) > campKey(current)) current = r.campaña; });
 
+  const currentRows = allRows.filter(r => r.campaña === current);
+  let cutoffRow = currentRows[0];
+  currentRows.forEach(r => { if (new Date(r.fecha_info) > new Date(cutoffRow.fecha_info)) cutoffRow = r; });
+  const cutoffMonth = cutoffRow ? cutoffRow.mes_ano.split('-')[0] : 'Jun';
+
   const histMap = new Map();
   allRows.forEach(r => {
-    if (r.campaña !== current && r.mes_ano.startsWith('Jun')) histMap.set(r.campaña, r);
+    if (r.campaña !== current && r.mes_ano.startsWith(cutoffMonth)) histMap.set(r.campaña, r);
   });
   const hist = Array.from(histMap.values()).sort((a, b) => campKey(a.campaña) - campKey(b.campaña));
 
@@ -845,13 +851,13 @@ async function loadLiveData(){
    ========================================================= */
 
 let SOJA_DATA = [
-  {"campaña":"18/19","mes_ano":"Jun-19","fecha_info":"6/19/2019","produccion":55300,"pct_comprado":48,"total_comprado":26462,"expo":6422,"industria":20041,"a_fijar_1":9874,"a_fijar_2":37,"queda_vender_tn":28838,"queda_vender_mas_fijar":null,"precio":null,"queda_vender_musd":null},
-  {"campaña":"19/20","mes_ano":"Jun-20","fecha_info":"6/17/2020","produccion":48800,"pct_comprado":52,"total_comprado":25162.8,"expo":6878.7,"industria":18284.1,"a_fijar_1":9088.1,"a_fijar_2":36,"queda_vender_tn":23637,"queda_vender_mas_fijar":32725,"precio":null,"queda_vender_musd":null},
-  {"campaña":"20/21","mes_ano":"Jun-21","fecha_info":"6/16/2021","produccion":46200,"pct_comprado":49,"total_comprado":22503.8,"expo":5385.2,"industria":17118.6,"a_fijar_1":6965.5,"a_fijar_2":31,"queda_vender_tn":23696,"queda_vender_mas_fijar":30662,"precio":null,"queda_vender_musd":null},
-  {"campaña":"21/22","mes_ano":"Jun-22","fecha_info":"6/22/2022","produccion":44000,"pct_comprado":43,"total_comprado":19097.6,"expo":2608.4,"industria":16489.2,"a_fijar_1":8173.9,"a_fijar_2":43,"queda_vender_tn":24902,"queda_vender_mas_fijar":33076,"precio":null,"queda_vender_musd":null},
-  {"campaña":"22/23","mes_ano":"Jun-23","fecha_info":"6/21/2023","produccion":25000,"pct_comprado":43,"total_comprado":10803.9,"expo":1363.7,"industria":9440.2,"a_fijar_1":3692.3,"a_fijar_2":34,"queda_vender_tn":14196,"queda_vender_mas_fijar":17888,"precio":null,"queda_vender_musd":null,"note":"Campaña de sequía severa"},
-  {"campaña":"23/24","mes_ano":"Jun-24","fecha_info":"6/19/2024","produccion":50500,"pct_comprado":43,"total_comprado":21632.9,"expo":4468.9,"industria":17164.0,"a_fijar_1":8588.0,"a_fijar_2":40,"queda_vender_tn":28867,"queda_vender_mas_fijar":37455,"precio":null,"queda_vender_musd":null},
-  {"campaña":"24/25","mes_ano":"Jun-25","fecha_info":"6/25/2025","produccion":51100,"pct_comprado":47,"total_comprado":23825.9,"expo":5407.0,"industria":18418.9,"a_fijar_1":5539.1,"a_fijar_2":23,"queda_vender_tn":27274,"queda_vender_mas_fijar":32813,"precio":null,"queda_vender_musd":null},
+    {"campaña":"18/19","mes_ano":"Jul-19","fecha_info":"7/21/2019","produccion":55300,"pct_comprado":53,"total_comprado":29186.6,"expo":7341.6,"industria":21845,"a_fijar_1":9199.3,"a_fijar_2":32,"queda_vender_tn":26113,"queda_vender_mas_fijar":null,"precio":null,"queda_vender_musd":null},
+    {"campaña":"19/20","mes_ano":"Jul-20","fecha_info":"7/22/2020","produccion":48800,"pct_comprado":57,"total_comprado":27857.2,"expo":7435.5,"industria":20421.7,"a_fijar_1":8758.1,"a_fijar_2":31,"queda_vender_tn":20943,"queda_vender_mas_fijar":29701,"precio":null,"queda_vender_musd":null},
+    {"campaña":"20/21","mes_ano":"Jul-21","fecha_info":"7/28/2021","produccion":46200,"pct_comprado":57,"total_comprado":26272.2,"expo":6997.2,"industria":19275,"a_fijar_1":6215.6,"a_fijar_2":24,"queda_vender_tn":19928,"queda_vender_mas_fijar":26143,"precio":null,"queda_vender_musd":null},
+    {"campaña":"21/22","mes_ano":"Jul-22","fecha_info":"7/27/2022","produccion":44000,"pct_comprado":48,"total_comprado":21314.4,"expo":3227.5,"industria":18086.9,"a_fijar_1":7521.2,"a_fijar_2":35,"queda_vender_tn":22686,"queda_vender_mas_fijar":30207,"precio":null,"queda_vender_musd":null},
+    {"campaña":"22/23","mes_ano":"Jul-23","fecha_info":"7/26/2023","produccion":25000,"pct_comprado":46,"total_comprado":11504.3,"expo":1376,"industria":10128.3,"a_fijar_1":3835.8,"a_fijar_2":33,"queda_vender_tn":13496,"queda_vender_mas_fijar":17332,"precio":null,"queda_vender_musd":null,"note":"Campaña de sequía severa"},
+    {"campaña":"23/24","mes_ano":"Jul-24","fecha_info":"7/24/2024","produccion":50500,"pct_comprado":48,"total_comprado":24115.6,"expo":5223.9,"industria":18891.7,"a_fijar_1":7501.5,"a_fijar_2":31,"queda_vender_tn":26384,"queda_vender_mas_fijar":33886,"precio":null,"queda_vender_musd":null},
+    {"campaña":"24/25","mes_ano":"Jul-25","fecha_info":"7/23/2025","produccion":51100,"pct_comprado":54,"total_comprado":27431.6,"expo":6611.5,"industria":20820.1,"a_fijar_1":5495.5,"a_fijar_2":20,"queda_vender_tn":23668,"queda_vender_mas_fijar":29164,"precio":null,"queda_vender_musd":null},
   {"campaña":"24/25","mes_ano":"Nov-25","fecha_info":"11/19/2025","produccion":51100,"pct_comprado":78,"total_comprado":39923.6,"expo":10971.5,"industria":28952.1,"a_fijar_1":3206.7,"a_fijar_2":8,"queda_vender_tn":11176,"queda_vender_mas_fijar":14383,"precio":437,"queda_vender_musd":4884},
   {"campaña":"24/25","mes_ano":"Dec-25","fecha_info":"12/17/2025","produccion":51100,"pct_comprado":80,"total_comprado":41099.9,"expo":11110.9,"industria":29989.0,"a_fijar_1":2890.7,"a_fijar_2":7,"queda_vender_tn":10000,"queda_vender_mas_fijar":12891,"precio":418,"queda_vender_musd":4180},
   {"campaña":"24/25","mes_ano":"Jan-26","fecha_info":"1/21/2026","produccion":51100,"pct_comprado":84,"total_comprado":42709.3,"expo":11342.0,"industria":31367.3,"a_fijar_1":2597.0,"a_fijar_2":6,"queda_vender_tn":8391,"queda_vender_mas_fijar":10988,"precio":407,"queda_vender_musd":3415},
@@ -863,13 +869,13 @@ let SOJA_DATA = [
 ];
 
 let MAIZ_DATA = [
-  {"campaña":"18/19","mes_ano":"Jun-19","fecha_info":"6/19/2019","produccion":57000,"pct_comprado":43,"total_comprado":24778,"expo":23495,"industria":1284,"saldo_fijar_1":645,"saldo_fijar_2":3,"queda_vender_tn":32222,"precio":null,"queda_vender_musd":null},
-  {"campaña":"19/20","mes_ano":"Jun-20","fecha_info":"6/17/2020","produccion":55500,"pct_comprado":50,"total_comprado":27665,"expo":26345,"industria":1319,"saldo_fijar_1":1290,"saldo_fijar_2":5,"queda_vender_tn":27836,"precio":null,"queda_vender_musd":null},
-  {"campaña":"20/21","mes_ano":"Jun-21","fecha_info":"6/16/2021","produccion":60500,"pct_comprado":51,"total_comprado":30591,"expo":29412,"industria":1180,"saldo_fijar_1":4490,"saldo_fijar_2":15,"queda_vender_tn":29909,"precio":null,"queda_vender_musd":null},
-  {"campaña":"21/22","mes_ano":"Jun-22","fecha_info":"6/22/2022","produccion":59000,"pct_comprado":51,"total_comprado":30369,"expo":28925,"industria":1444,"saldo_fijar_1":7168,"saldo_fijar_2":24,"queda_vender_tn":28631,"precio":null,"queda_vender_musd":null},
-  {"campaña":"22/23","mes_ano":"Jun-23","fecha_info":"6/21/2023","produccion":41400,"pct_comprado":34,"total_comprado":14274,"expo":13383,"industria":891,"saldo_fijar_1":5080,"saldo_fijar_2":36,"queda_vender_tn":27126,"precio":null,"queda_vender_musd":null,"note":"Campaña de sequía severa"},
-  {"campaña":"23/24","mes_ano":"Jun-24","fecha_info":"6/19/2024","produccion":57700,"pct_comprado":38,"total_comprado":22033,"expo":20710,"industria":1323,"saldo_fijar_1":7577,"saldo_fijar_2":34,"queda_vender_tn":35667,"precio":186,"queda_vender_musd":6634},
-  {"campaña":"24/25","mes_ano":"Jun-25","fecha_info":"6/25/2025","produccion":51700,"pct_comprado":41,"total_comprado":21068,"expo":19376.5,"industria":1691.4,"saldo_fijar_1":5229.0,"saldo_fijar_2":25,"queda_vender_tn":30632,"precio":null,"queda_vender_musd":null},
+    {"campaña":"18/19","mes_ano":"Jul-19","fecha_info":"7/17/2019","produccion":57000,"pct_comprado":49,"total_comprado":27700,"expo":25940,"industria":1760,"saldo_fijar_1":2676,"saldo_fijar_2":10,"queda_vender_tn":29300,"precio":null,"queda_vender_musd":null},
+    {"campaña":"19/20","mes_ano":"Jul-20","fecha_info":"7/22/2020","produccion":58400,"pct_comprado":54,"total_comprado":31645,"expo":29893,"industria":1752,"saldo_fijar_1":5208,"saldo_fijar_2":16,"queda_vender_tn":26755,"precio":null,"queda_vender_musd":null},
+    {"campaña":"20/21","mes_ano":"Jul-21","fecha_info":"7/28/2021","produccion":60500,"pct_comprado":59,"total_comprado":35754,"expo":33566,"industria":2187.8,"saldo_fijar_1":5096.8,"saldo_fijar_2":14,"queda_vender_tn":24746,"precio":null,"queda_vender_musd":null},
+    {"campaña":"21/22","mes_ano":"Jul-22","fecha_info":"7/27/2022","produccion":59000,"pct_comprado":58,"total_comprado":34490,"expo":31934.2,"industria":2555.6,"saldo_fijar_1":7139.3,"saldo_fijar_2":21,"queda_vender_tn":24510,"precio":null,"queda_vender_musd":null},
+    {"campaña":"22/23","mes_ano":"Jul-23","fecha_info":"7/26/2023","produccion":41400,"pct_comprado":44,"total_comprado":18109,"expo":16378.7,"industria":1729.9,"saldo_fijar_1":4763.8,"saldo_fijar_2":26,"queda_vender_tn":23291,"precio":null,"queda_vender_musd":null,"note":"Campaña de sequía severa"},
+    {"campaña":"23/24","mes_ano":"Jul-24","fecha_info":"7/24/2024","produccion":57700,"pct_comprado":47,"total_comprado":27017,"expo":24686.5,"industria":2330,"saldo_fijar_1":7704.5,"saldo_fijar_2":29,"queda_vender_tn":30684,"precio":null,"queda_vender_musd":null},
+    {"campaña":"24/25","mes_ano":"Jul-25","fecha_info":"7/23/2025","produccion":51700,"pct_comprado":46,"total_comprado":23871,"expo":21691.6,"industria":2179.4,"saldo_fijar_1":5207.6,"saldo_fijar_2":22,"queda_vender_tn":27829,"precio":null,"queda_vender_musd":null},
   {"campaña":"24/25","mes_ano":"Nov-25","fecha_info":"11/19/2025","produccion":51700,"pct_comprado":61,"total_comprado":31645,"expo":27471,"industria":4174,"saldo_fijar_1":4038,"saldo_fijar_2":13,"queda_vender_tn":20055,"precio":208,"queda_vender_musd":4171},
   {"campaña":"24/25","mes_ano":"Dec-25","fecha_info":"12/17/2025","produccion":51700,"pct_comprado":63,"total_comprado":32654,"expo":28480,"industria":4174,"saldo_fijar_1":3455,"saldo_fijar_2":11,"queda_vender_tn":19046,"precio":216,"queda_vender_musd":4114},
   {"campaña":"24/25","mes_ano":"Jan-26","fecha_info":"1/21/2026","produccion":51700,"pct_comprado":68,"total_comprado":35031,"expo":30002,"industria":5029,"saldo_fijar_1":3093,"saldo_fijar_2":9,"queda_vender_tn":16669,"precio":216,"queda_vender_musd":3601},
@@ -881,12 +887,12 @@ let MAIZ_DATA = [
 ];
 
 let TRIGO_DATA = [
-  {"campaña":"19/20","mes_ano":"Jun-20","fecha_info":"6/17/2020","produccion":19800,"pct_comprado":92,"total_comprado":18289,"expo":14959.7,"industria":3329.7,"saldo_fijar_1":1290.0,"saldo_fijar_2":7,"queda_vender_tn":1511,"precio":null,"queda_vender_musd":null},
-  {"campaña":"20/21","mes_ano":"Jun-21","fecha_info":"6/16/2021","produccion":17700,"pct_comprado":77,"total_comprado":13614,"expo":10810.8,"industria":2803.1,"saldo_fijar_1":1378.3,"saldo_fijar_2":10,"queda_vender_tn":4086,"precio":null,"queda_vender_musd":null},
-  {"campaña":"21/22","mes_ano":"Jun-22","fecha_info":"6/22/2022","produccion":22200,"pct_comprado":92,"total_comprado":20462,"expo":17426.5,"industria":3035.5,"saldo_fijar_1":1874.9,"saldo_fijar_2":9,"queda_vender_tn":1738,"precio":null,"queda_vender_musd":null},
-  {"campaña":"22/23","mes_ano":"Jun-23","fecha_info":"6/21/2023","produccion":12600,"pct_comprado":77,"total_comprado":9757,"expo":6453.1,"industria":3303.5,"saldo_fijar_1":1776.7,"saldo_fijar_2":18,"queda_vender_tn":2843,"precio":null,"queda_vender_musd":null,"note":"Campaña de sequía severa"},
-  {"campaña":"23/24","mes_ano":"Jun-24","fecha_info":"6/26/2024","produccion":15900,"pct_comprado":68,"total_comprado":10857,"expo":7500.6,"industria":3355.9,"saldo_fijar_1":1212.7,"saldo_fijar_2":11,"queda_vender_tn":5044,"precio":null,"queda_vender_musd":null},
-  {"campaña":"24/25","mes_ano":"Jun-25","fecha_info":"6/25/2025","produccion":18500,"pct_comprado":77,"total_comprado":14266,"expo":10757.3,"industria":3508.5,"saldo_fijar_1":1045.2,"saldo_fijar_2":7,"queda_vender_tn":4234,"precio":null,"queda_vender_musd":null},
+    {"campaña":"19/20","mes_ano":"Jul-20","fecha_info":"7/22/2020","produccion":19800,"pct_comprado":95,"total_comprado":18888,"expo":15223.9,"industria":3664,"saldo_fijar_1":1132.6,"saldo_fijar_2":6,"queda_vender_tn":912,"precio":null,"queda_vender_musd":null},
+    {"campaña":"20/21","mes_ano":"Jul-21","fecha_info":"7/28/2021","produccion":17700,"pct_comprado":82,"total_comprado":14527,"expo":11270.2,"industria":3256.5,"saldo_fijar_1":1214.6,"saldo_fijar_2":8,"queda_vender_tn":3173,"precio":null,"queda_vender_musd":null},
+    {"campaña":"21/22","mes_ano":"Jul-22","fecha_info":"7/27/2022","produccion":22200,"pct_comprado":96,"total_comprado":21219,"expo":17740.5,"industria":3478.1,"saldo_fijar_1":1746.5,"saldo_fijar_2":8,"queda_vender_tn":981,"precio":null,"queda_vender_musd":null},
+    {"campaña":"22/23","mes_ano":"Jul-23","fecha_info":"7/26/2023","produccion":12600,"pct_comprado":84,"total_comprado":10522,"expo":6709.9,"industria":3812.2,"saldo_fijar_1":1650.4,"saldo_fijar_2":16,"queda_vender_tn":2078,"precio":null,"queda_vender_musd":null,"note":"Campaña de sequía severa"},
+    {"campaña":"23/24","mes_ano":"Jul-24","fecha_info":"7/24/2024","produccion":15900,"pct_comprado":72,"total_comprado":11418,"expo":7764.3,"industria":3653.7,"saldo_fijar_1":1128,"saldo_fijar_2":10,"queda_vender_tn":4482,"precio":null,"queda_vender_musd":null},
+    {"campaña":"24/25","mes_ano":"Jul-25","fecha_info":"7/23/2025","produccion":18500,"pct_comprado":82,"total_comprado":15230,"expo":11435.7,"industria":3793.9,"saldo_fijar_1":830.4,"saldo_fijar_2":5,"queda_vender_tn":3270,"precio":null,"queda_vender_musd":null},
   {"campaña":"25/26","mes_ano":"Nov-25","fecha_info":"11/19/2025","produccion":27900,"pct_comprado":25,"total_comprado":6947,"expo":6513.3,"industria":433.7,"saldo_fijar_1":2641.1,"saldo_fijar_2":38,"queda_vender_tn":20953,"precio":212,"queda_vender_musd":4442},
   {"campaña":"25/26","mes_ano":"Dec-25","fecha_info":"12/17/2025","produccion":27900,"pct_comprado":36,"total_comprado":10135,"expo":9125.2,"industria":1009.6,"saldo_fijar_1":2971.2,"saldo_fijar_2":29,"queda_vender_tn":17765,"precio":208,"queda_vender_musd":3695},
   {"campaña":"25/26","mes_ano":"Jan-26","fecha_info":"1/21/2026","produccion":27900,"pct_comprado":50,"total_comprado":13989,"expo":12488.8,"industria":1499.9,"saldo_fijar_1":3244.0,"saldo_fijar_2":23,"queda_vender_tn":13911,"precio":208,"queda_vender_musd":2894},
@@ -1169,8 +1175,15 @@ function renderProgressChart(cropKey){
 function renderHistoryChart(cropKey){
   const cfg = CROPS[cropKey];
   const metric = activeMetric.history[cropKey];
-  // una fila por campaña, tomando el corte de junio de cada año (comparable entre campañas)
-  const rows = cfg.data.filter(r => r.mes_ano.startsWith('Jun'));
+
+  const campaigns = campaignsSortedDesc(cfg.data);
+  const current = campaigns[0];
+  const currentRows = rowsForCampaign(cfg.data, current);
+  let cutoffRow = currentRows[0];
+  currentRows.forEach(r => { if (new Date(r.fecha_info) > new Date(cutoffRow.fecha_info)) cutoffRow = r; });
+  const cutoffMonth = monthAbbrev(cutoffRow.mes_ano);
+
+  const rows = cfg.data.filter(r => monthAbbrev(r.mes_ano) === cutoffMonth);
   const labels = rows.map(r => r.campaña);
   const values = rows.map(r => convertForDisplay(metric, r[metric]));
   const colors = rows.map((r,i) => i === rows.length-1 ? cfg.color : cfg.color + '55');
@@ -1203,11 +1216,18 @@ function renderHistoryChart(cropKey){
     });
   }
 
+  const mesNombre = MES_NOMBRE_ES[cutoffMonth] || cutoffMonth;
+
   chartInstances[ctxId] = new Chart(ctx, {
     type:'bar',
     data:{ labels, datasets },
-    options: chartOptions('Corte a fin de junio de cada campaña', {beginAtZero:true, showLegend: avg !== null})
+    options: chartOptions(`Corte a fin de ${mesNombre} de cada campaña`, {beginAtZero:true, showLegend: avg !== null})
   });
+
+  const descEl = document.getElementById(`${cropKey}-history-desc`);
+  if (descEl && labels.length){
+    descEl.textContent = `Comparación al mismo corte de ${mesNombre} de cada campaña, desde ${labels[0]} hasta ${labels[labels.length-1]}.`;
+  }
 }
 
 function chartOptions(subtitle, opts={}){
