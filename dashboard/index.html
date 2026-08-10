@@ -967,7 +967,7 @@ const CROPS = {
       {key:'produccion', label:'Producción (mill. tn)'},
       {key:'pct_comprado', label:'% Comercializado'},
       {key:'total_comprado', label:'Total comprado (mill. tn)'},
-      {key:'a_fijar_1', label:'Saldo a fijar (mill. tn)'},
+      {key:'a_fijar_2', label:'Saldo a fijar (% del vendido)'},
       {key:'queda_vender_tn', label:'Queda por vender (mill. tn)'},
       {key:'queda_vender_musd', label:'Queda por vender (USD M)'}
     ]
@@ -982,7 +982,7 @@ const CROPS = {
       {key:'produccion', label:'Producción (mill. tn)'},
       {key:'pct_comprado', label:'% Comercializado'},
       {key:'total_comprado', label:'Total comprado (mill. tn)'},
-      {key:'saldo_fijar_1', label:'Saldo a fijar (mill. tn)'},
+      {key:'saldo_fijar_2', label:'Saldo a fijar (% del vendido)'},
       {key:'queda_vender_tn', label:'Queda por vender (mill. tn)'},
       {key:'queda_vender_musd', label:'Queda por vender (USD M)'}
     ]
@@ -997,7 +997,7 @@ const CROPS = {
       {key:'produccion', label:'Producción (mill. tn)'},
       {key:'pct_comprado', label:'% Comercializado'},
       {key:'total_comprado', label:'Total comprado (mill. tn)'},
-      {key:'saldo_fijar_1', label:'Saldo a fijar (mill. tn)'},
+      {key:'saldo_fijar_2', label:'Saldo a fijar (% del vendido)'},
       {key:'queda_vender_tn', label:'Queda por vender (mill. tn)'},
       {key:'queda_vender_musd', label:'Queda por vender (USD M)'}
     ]
@@ -1026,7 +1026,7 @@ function buildCards(cropKey){
     {label:'Producción', value:`${numFmt(last.produccion/1000,2)}`, sub:'mill. tn', accent:true},
     {label:'% Comercializado', value:`${numFmt(last.pct_comprado)}%`, sub:'sobre producción'},
     {label:'Total comprado', value:numFmt(last.total_comprado/1000,2), sub:'mill. tn'},
-    {label:'Saldo a fijar', value:numFmt(last[cfg.saldoField]/1000,2), sub:`mill. tn (${numFmt(last[cfg.saldoPctField])}% del comprado)`},
+    {label:'Saldo a fijar', value:`${numFmt(last[cfg.saldoPctField])}%`, sub:`del total vendido (${numFmt(last[cfg.saldoField]/1000,2)} mill. tn)`},
     {label:'Queda por vender', value:numFmt(last.queda_vender_tn/1000,2), sub:'mill. tn'},
     {label:'Queda por vender', value: last.queda_vender_musd ? `US$ ${numFmt(last.queda_vender_musd)} M` : '—', sub:'valorizado'}
   ];
