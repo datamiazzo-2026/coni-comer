@@ -27,6 +27,9 @@
     --accent-maiz:  #b8862c;
     --accent-trigo: #9c3b26;
     --accent-liquidacion: #2f6690;
+    --accent-granos: #3b6d11;
+    --accent-carnes: #a13b5c;
+    --accent-regionales: #c17d1f;
 
     --radius:8px;
   }
@@ -124,6 +127,18 @@
   }
   .panel{ display:none; }
   .panel.active{ display:block; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+  .data-table-wrap{ overflow-x:auto; }
+  table.data-table{ width:100%; border-collapse:collapse; font-size:0.82rem; }
+  table.data-table th{ text-align:right; color:var(--ink-3); font-weight:600; font-size:0.68rem; text-transform:uppercase; letter-spacing:.03em; padding:8px 6px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  table.data-table th:first-child{ text-align:left; }
+  table.data-table td{ text-align:right; padding:7px 6px; border-bottom:1px solid var(--line-2); color:var(--ink); white-space:nowrap; }
+  table.data-table td:first-child{ text-align:left; font-weight:600; }
+  table.data-table tr.total-row td{ font-weight:700; border-top:1px solid var(--ink-3); }
+  table.data-table .var-up{ color:var(--up); }
+  table.data-table .var-down{ color:var(--down); }
+  table.data-table .var-flat{ color:var(--ink-3); }
 
   .cards{
     display:grid;
@@ -492,6 +507,13 @@
   </a>
 </header>
 
+<nav class="tabs" id="top-nav">
+  <button class="tab-btn active" data-view="comercializacion" onclick="showView('comercializacion')">Comercialización</button>
+  <button class="tab-btn" data-view="produccion" onclick="showView('produccion')">Producción agropecuaria</button>
+</nav>
+
+<div id="view-comercializacion" class="view active">
+
 <nav class="tabs" id="tabs-nav">
   <button class="tab-btn active" data-tab="soja" onclick="showTab('soja')">Soja</button>
   <button class="tab-btn" data-tab="maiz" onclick="showTab('maiz')">Maíz</button>
@@ -599,6 +621,60 @@
   </section>
 
 </main>
+
+</div><!-- /view-comercializacion -->
+
+<div id="view-produccion" class="view">
+
+<nav class="tabs" id="prod-tabs-nav">
+  <button class="tab-btn active" data-tab="granos" onclick="showProdTab('granos')">Granos</button>
+  <button class="tab-btn" data-tab="carnes" onclick="showProdTab('carnes')">Carnes y leche</button>
+  <button class="tab-btn" data-tab="regionales" onclick="showProdTab('regionales')">Regionales</button>
+</nav>
+
+<main>
+
+  <!-- ===================== GRANOS ===================== -->
+  <section id="prod-panel-granos" class="panel active">
+    <div class="cards" id="granos-cards"></div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-granos)">
+      <h2>Granos: comparación histórica</h2>
+      <div class="desc">Campaña actual (2025/2026) vs. campaña anterior y promedio de los últimos 5 años. Actualizado mensualmente.</div>
+      <div class="metric-select" id="granos-metric-select"></div>
+      <div class="data-table-wrap"><table class="data-table" id="granos-table"></table></div>
+      <div class="chart-source">Fuente: CONINAGRO en base a Bolsa de Cereales de Buenos Aires y SAGyP</div>
+    </div>
+  </section>
+
+  <!-- ===================== CARNES Y LECHE ===================== -->
+  <section id="prod-panel-carnes" class="panel">
+    <div class="cards" id="carnes-cards"></div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-carnes)">
+      <h2>Carnes y leche: producción</h2>
+      <div class="desc">Últimos 12 meses vs. año anterior y promedio de los últimos 5 años.</div>
+      <div class="data-table-wrap"><table class="data-table" id="carnes-table"></table></div>
+      <div class="chart-source">Fuente: CONINAGRO en base a SAGyP</div>
+    </div>
+  </section>
+
+  <!-- ===================== REGIONALES ===================== -->
+  <section id="prod-panel-regionales" class="panel">
+    <div class="cards" id="regionales-cards"></div>
+
+    <div class="chart-section" style="--tab-accent:var(--accent-regionales)">
+      <h2>Economías regionales: producción</h2>
+      <div class="desc">Campaña/período actual vs. campaña anterior y promedio de los últimos 5 años.</div>
+      <div class="data-table-wrap"><table class="data-table" id="regionales-table"></table></div>
+      <div class="chart-source">Fuente: CONINAGRO en base a SAGyP, CAM, INV, INYM, FederCitrus, SENASA</div>
+    </div>
+  </section>
+
+</main>
+
+</div><!-- /view-produccion -->
+
 
 </div><!-- /#app-shell -->
 
@@ -1436,11 +1512,159 @@ function initCrop(cropKey){
 }
 
 function showTab(tabKey){
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#view-comercializacion .panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(`panel-${tabKey}`).classList.add('active');
   document.querySelector(`.tab-btn[data-tab="${tabKey}"]`).classList.add('active');
 }
+
+function varSpan(v){
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  var cls = v > 0 ? 'var-up' : (v < 0 ? 'var-down' : 'var-flat');
+  var sign = v > 0 ? '+' : '';
+  return '<span class="' + cls + '">' + sign + v + '%</span>';
+}
+
+function cardHtml(label, value, sub, accent){
+  return '<div class="card ' + (accent?'accent':'') + '"><div class="label">' + label + '</div><div class="value">' + value + '</div><div class="sub">' + sub + '</div></div>';
+}
+
+const GRANOS_DATA = {
+  prod: [
+    {c:'Soja', actual:50.1, ant:50.3, prom5:41.6, varAnt:0, varProm5:20},
+    {c:'Maíz', actual:64.0, ant:49.0, prom5:47.9, varAnt:31, varProm5:34},
+    {c:'Sorgo', actual:2.9, ant:3.1, prom5:3.1, varAnt:-6, varProm5:-6},
+    {c:'Girasol', actual:6.6, ant:5.0, prom5:4.0, varAnt:32, varProm5:65},
+    {c:'Trigo', actual:27.8, ant:18.6, prom5:17.1, varAnt:49, varProm5:63},
+    {c:'Cebada', actual:5.4, ant:5.0, prom5:4.7, varAnt:8, varProm5:14},
+    {c:'Total', actual:156.8, ant:131.0, prom5:118.4, varAnt:20, varProm5:32, total:true}
+  ],
+  precio: [
+    {c:'Soja', actual:451, ant:407, prom5:513, varMes:8, varAnt:11, varProm5:-12},
+    {c:'Maíz', actual:207, ant:209, prom5:242, varMes:6, varAnt:-1, varProm5:-15},
+    {c:'Sorgo', actual:224, ant:205, prom5:251, varMes:-3, varAnt:9, varProm5:-11},
+    {c:'Girasol', actual:501, ant:432, prom5:544, varMes:4, varAnt:16, varProm5:-8},
+    {c:'Trigo', actual:229, ant:234, prom5:302, varMes:-3, varAnt:-2, varProm5:-24},
+    {c:'Cebada', actual:219, ant:217, prom5:260, varMes:-6, varAnt:1, varProm5:-16},
+    {c:'Total', actual:347, ant:328, prom5:403, varMes:3, varAnt:6, varProm5:-14, total:true}
+  ],
+  vbp: [
+    {c:'Soja', actual:22595, ant:20468, prom5:21342, varAnt:10, varProm5:6},
+    {c:'Maíz', actual:13248, ant:10253, prom5:11601, varAnt:29, varProm5:14},
+    {c:'Sorgo', actual:650, ant:636, prom5:778, varAnt:2, varProm5:-17},
+    {c:'Girasol', actual:3307, ant:2158, prom5:2177, varAnt:53, varProm5:52},
+    {c:'Trigo', actual:6366, ant:4352, prom5:5152, varAnt:46, varProm5:24},
+    {c:'Cebada', actual:1183, ant:1085, prom5:1227, varAnt:9, varProm5:-4},
+    {c:'Total', actual:47348, ant:38953, prom5:42278, varAnt:22, varProm5:12, total:true}
+  ]
+};
+const GRANOS_DEC = { prod:1, precio:0, vbp:0 };
+
+function renderGranosTable(metric){
+  const rows = GRANOS_DATA[metric];
+  const dec = GRANOS_DEC[metric];
+  const hasMes = metric === 'precio';
+  const thead = '<thead><tr><th>Cultivo</th><th>Actual</th><th>Camp. anterior</th><th>Prom. 5 años</th>' + (hasMes ? '<th>Var mes ant.</th>' : '') + '<th>Var camp. ant.</th><th>Var prom. 5a</th></tr></thead>';
+  const tbody = rows.map(r => '<tr class="' + (r.total?'total-row':'') + '"><td>' + r.c + '</td><td>' + numFmt(r.actual, dec) + '</td><td>' + numFmt(r.ant, dec) + '</td><td>' + numFmt(r.prom5, dec) + '</td>' + (hasMes ? '<td>' + varSpan(r.varMes) + '</td>' : '') + '<td>' + varSpan(r.varAnt) + '</td><td>' + varSpan(r.varProm5) + '</td></tr>').join('');
+  document.getElementById('granos-table').innerHTML = thead + '<tbody>' + tbody + '</tbody>';
+}
+
+function buildGranosMetricSelect(){
+  const metrics = [{key:'prod',label:'Producción'},{key:'precio',label:'Precios FOB'},{key:'vbp',label:'VBP'}];
+  const el = document.getElementById('granos-metric-select');
+  el.innerHTML = metrics.map(m => '<button data-metric="' + m.key + '" class="' + (m.key==='prod'?'active':'') + '">' + m.label + '</button>').join('');
+  el.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    el.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    renderGranosTable(b.dataset.metric);
+  }));
+}
+
+function buildGranosCards(){
+  const prodTotal = GRANOS_DATA.prod.find(r => r.total);
+  const vbpTotal = GRANOS_DATA.vbp.find(r => r.total);
+  const precioTotal = GRANOS_DATA.precio.find(r => r.total);
+  document.getElementById('granos-cards').innerHTML =
+    cardHtml('Producción total', numFmt(prodTotal.actual,1), 'mill tn · ' + varSpan(prodTotal.varAnt) + ' vs. campaña anterior', true) +
+    cardHtml('VBP total', 'US$ ' + numFmt(vbpTotal.actual,0) + ' M', varSpan(vbpTotal.varProm5) + ' vs. prom. 5 años') +
+    cardHtml('Precio promedio jul-26', 'US$ ' + numFmt(precioTotal.actual,0) + ' /tn', varSpan(precioTotal.varProm5) + ' vs. prom. 5 años');
+}
+
+const CARNES_DATA = [
+  {p:'Bovina', ult12:3.1, ant:3.2, prom5:3.2, varAnt:-4, varProm5:-5, dec:1},
+  {p:'Porcina', ult12:0.8, ant:0.8, prom5:0.7, varAnt:8, varProm5:13, dec:1},
+  {p:'Aviar', ult12:2.3, ant:2.3, prom5:2.3, varAnt:-2, varProm5:-3, dec:1},
+  {p:'Total carnes', ult12:6.2, ant:6.3, prom5:6.3, varAnt:-2, varProm5:-2, dec:1, total:true},
+  {p:'Leche (mill litros)', ult12:11883, ant:11112, prom5:11546, varAnt:7, varProm5:3, dec:0}
+];
+
+function renderCarnesTable(){
+  const thead = '<thead><tr><th>Producto</th><th>Últ. 12 meses</th><th>Año anterior</th><th>Prom. 5 años</th><th>Var año ant.</th><th>Var prom. 5a</th></tr></thead>';
+  const tbody = CARNES_DATA.map(r => '<tr class="' + (r.total?'total-row':'') + '"><td>' + r.p + '</td><td>' + numFmt(r.ult12, r.dec) + '</td><td>' + numFmt(r.ant, r.dec) + '</td><td>' + numFmt(r.prom5, r.dec) + '</td><td>' + varSpan(r.varAnt) + '</td><td>' + varSpan(r.varProm5) + '</td></tr>').join('');
+  document.getElementById('carnes-table').innerHTML = thead + '<tbody>' + tbody + '</tbody>';
+}
+
+function buildCarnesCards(){
+  const total = CARNES_DATA.find(r => r.total);
+  const leche = CARNES_DATA.find(r => r.p.indexOf('Leche') === 0);
+  const porcina = CARNES_DATA.find(r => r.p === 'Porcina');
+  document.getElementById('carnes-cards').innerHTML =
+    cardHtml('Producción total carnes', numFmt(total.ult12,1), 'mill tn · ' + varSpan(total.varAnt) + ' interanual', true) +
+    cardHtml('Leche', numFmt(leche.ult12,0), 'mill litros · ' + varSpan(leche.varAnt) + ' interanual') +
+    cardHtml('Porcina', numFmt(porcina.ult12,1), 'mill tn · ' + varSpan(porcina.varProm5) + ' vs. prom. 5 años');
+}
+
+const REGIONALES_DATA = [
+  {p:'Arroz', camp:'2025-26', actual:1400000, ant:1600000, prom5:1374000, varAnt:-13, varProm5:2},
+  {p:'Maní', camp:'2025-26', actual:1311996, ant:1895131, prom5:1408056, varAnt:-31, varProm5:-7},
+  {p:'Legumbres', camp:'2025-26', actual:1444000, ant:1292558, prom5:1049848, varAnt:12, varProm5:38},
+  {p:'Algodón', camp:'2025-26', actual:770000, ant:1000000, prom5:1130000, varAnt:-23, varProm5:-32},
+  {p:'Uva', camp:'2026', actual:1839130, ant:1990834, prom5:1905350, varAnt:-8, varProm5:-3},
+  {p:'Yerba mate', camp:'jul25-jun26', actual:847014, ant:876859, prom5:846043, varAnt:-3, varProm5:0},
+  {p:'Cítricos dulces', camp:'2025', actual:1734000, ant:1565000, prom5:1475271, varAnt:11, varProm5:18},
+  {p:'Peras y manzanas', camp:'jul25-jun26', actual:726492, ant:792717, prom5:895032, varAnt:-8, varProm5:-19}
+];
+
+function renderRegionalesTable(){
+  const thead = '<thead><tr><th>Producto</th><th>Campaña</th><th>Actual</th><th>Camp./año ant.</th><th>Prom. 5 años</th><th>Var camp. ant.</th><th>Var prom. 5a</th></tr></thead>';
+  const tbody = REGIONALES_DATA.map(r => '<tr><td>' + r.p + '</td><td>' + r.camp + '</td><td>' + numFmt(r.actual,0) + '</td><td>' + numFmt(r.ant,0) + '</td><td>' + numFmt(r.prom5,0) + '</td><td>' + varSpan(r.varAnt) + '</td><td>' + varSpan(r.varProm5) + '</td></tr>').join('');
+  document.getElementById('regionales-table').innerHTML = thead + '<tbody>' + tbody + '</tbody>';
+}
+
+function buildRegionalesCards(){
+  const leg = REGIONALES_DATA.find(r => r.p === 'Legumbres');
+  const alg = REGIONALES_DATA.find(r => r.p === 'Algodón');
+  const per = REGIONALES_DATA.find(r => r.p === 'Peras y manzanas');
+  document.getElementById('regionales-cards').innerHTML =
+    cardHtml('Legumbres', numFmt(leg.actual/1000,0), 'mil tn · ' + varSpan(leg.varProm5) + ' vs. prom. 5 años (récord)', true) +
+    cardHtml('Algodón', numFmt(alg.actual/1000,0), 'mil tn · ' + varSpan(alg.varAnt) + ' vs. campaña anterior') +
+    cardHtml('Peras y manzanas', numFmt(per.actual/1000,0), 'mil tn · ' + varSpan(per.varProm5) + ' vs. prom. 5 años');
+}
+
+function showProdTab(tabKey){
+  document.querySelectorAll('#view-produccion .panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#prod-tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('prod-panel-' + tabKey).classList.add('active');
+  document.querySelector('#prod-tabs-nav .tab-btn[data-tab="' + tabKey + '"]').classList.add('active');
+}
+
+function showView(viewKey){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('#top-nav .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + viewKey).classList.add('active');
+  document.querySelector('#top-nav .tab-btn[data-view="' + viewKey + '"]').classList.add('active');
+}
+
+function initProduccion(){
+  buildGranosMetricSelect();
+  renderGranosTable('prod');
+  buildGranosCards();
+  renderCarnesTable();
+  buildCarnesCards();
+  renderRegionalesTable();
+  buildRegionalesCards();
+}
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   initDeviceSelect();
@@ -1450,6 +1674,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initCrop('trigo');
   initLiquidacion();
   initHeader();
+  initProduccion();
 });
 
 /* =========================================================
