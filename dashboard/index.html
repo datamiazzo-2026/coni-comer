@@ -95,6 +95,12 @@
     border-color:rgba(255,255,255,.7);
   }
   #site-header .pdf-btn svg{ flex-shrink:0; }
+  #site-header .pdf-btns{
+    display:flex;
+    gap:10px;
+    flex-shrink:0;
+    flex-wrap:wrap;
+  }
 
   nav.tabs{
     display:flex;
@@ -380,6 +386,9 @@
     padding:6px 10px;
     font-size:0.72rem;
   }
+  .mobile-mode #site-header .pdf-btns{
+    gap:6px;
+  }
   .mobile-mode nav.tabs{
     padding:0 8px;
     overflow-x:auto;
@@ -498,13 +507,22 @@
     <h1>CONINAGRO - MONITOR AGROPECUARIO</h1>
     <div class="updated">Actualizado: <span id="updated-date">—</span></div>
   </div>
+  <div class="pdf-btns">
   <a class="pdf-btn" href="https://drive.google.com/file/d/116SIDcY7C0LVJcPlmW9dnTDqKM5vUnEq/view?usp=sharing" target="_blank" rel="noopener noreferrer">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
       <polyline points="14 2 14 8 20 8"></polyline>
     </svg>
-    Informe PDF
+    Informe Comercialización
   </a>
+  <a class="pdf-btn" href="https://drive.google.com/file/d/1uhcKhp1M5bVcPxJ1AYVynKmlH5OJk4WU/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+      <polyline points="14 2 14 8 20 8"></polyline>
+    </svg>
+    Informe Producción
+  </a>
+  </div>
 </header>
 
 <nav class="tabs" id="top-nav">
