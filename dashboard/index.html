@@ -31,7 +31,7 @@
     --accent-carnes: #a13b5c;
     --accent-regionales: #c17d1f;
 
-    --radius:8px;
+    --radius:10px;
   }
   *{box-sizing:border-box;}
   body{
@@ -142,9 +142,9 @@
   table.data-table td{ text-align:right; padding:7px 6px; border-bottom:1px solid var(--line-2); color:var(--ink); white-space:nowrap; }
   table.data-table td:first-child{ text-align:left; font-weight:600; }
   table.data-table tr.total-row td{ font-weight:700; border-top:1px solid var(--ink-3); }
-  table.data-table .var-up{ color:var(--up); }
-  table.data-table .var-down{ color:var(--down); }
-  table.data-table .var-flat{ color:var(--ink-3); }
+  table.data-table .var-up{ color:var(--up); background:#eaf3de; border-radius:999px; padding:2px 8px; font-weight:700; }
+  table.data-table .var-down{ color:var(--down); background:#faece7; border-radius:999px; padding:2px 8px; font-weight:700; }
+  table.data-table .var-flat{ color:var(--ink-3); background:var(--bg-2); border-radius:999px; padding:2px 8px; font-weight:700; }
 
   .cards{
     display:grid;
@@ -533,10 +533,10 @@
 <div id="view-comercializacion" class="view active">
 
 <nav class="tabs" id="tabs-nav">
-  <button class="tab-btn active" data-tab="soja" onclick="showTab('soja')">Soja</button>
-  <button class="tab-btn" data-tab="maiz" onclick="showTab('maiz')">Maíz</button>
-  <button class="tab-btn" data-tab="trigo" onclick="showTab('trigo')">Trigo</button>
-  <button class="tab-btn" data-tab="liquidacion" onclick="showTab('liquidacion')">Liquidación</button>
+  <button class="tab-btn active" data-tab="soja" onclick="showTab('soja')">🫘 Soja</button>
+  <button class="tab-btn" data-tab="maiz" onclick="showTab('maiz')">🌽 Maíz</button>
+  <button class="tab-btn" data-tab="trigo" onclick="showTab('trigo')">🌾 Trigo</button>
+  <button class="tab-btn" data-tab="liquidacion" onclick="showTab('liquidacion')">💵 Liquidación</button>
 </nav>
 
 <main>
@@ -645,9 +645,9 @@
 <div id="view-produccion" class="view">
 
 <nav class="tabs" id="prod-tabs-nav">
-  <button class="tab-btn active" data-tab="granos" onclick="showProdTab('granos')">Granos</button>
-  <button class="tab-btn" data-tab="carnes" onclick="showProdTab('carnes')">Carnes y leche</button>
-  <button class="tab-btn" data-tab="regionales" onclick="showProdTab('regionales')">Regionales</button>
+  <button class="tab-btn active" data-tab="granos" onclick="showProdTab('granos')">🌾 Granos</button>
+  <button class="tab-btn" data-tab="carnes" onclick="showProdTab('carnes')">🥩 Carnes y leche</button>
+  <button class="tab-btn" data-tab="regionales" onclick="showProdTab('regionales')">🧺 Regionales</button>
 </nav>
 
 <main>
