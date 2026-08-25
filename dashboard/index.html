@@ -95,12 +95,39 @@
     border-color:rgba(255,255,255,.7);
   }
   #site-header .pdf-btn svg{ flex-shrink:0; }
-  #site-header .pdf-btns{
-    display:flex;
-    gap:10px;
-    flex-shrink:0;
-    flex-wrap:wrap;
+  #site-header .pdf-btn .chevron{ transition:transform .15s ease; }
+  #site-header .pdf-btn.open .chevron{ transform:rotate(180deg); }
+  #site-header .pdf-dropdown{ position:relative; flex-shrink:0; }
+  #site-header .pdf-menu{
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+    min-width:210px;
+    padding:6px;
+    display:none;
+    flex-direction:column;
+    gap:2px;
+    z-index:1001;
   }
+  #site-header .pdf-menu.open{ display:flex; }
+  #site-header .pdf-menu-item{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 10px;
+    border-radius:6px;
+    color:var(--ink);
+    font-size:0.85rem;
+    font-weight:600;
+    text-decoration:none;
+    transition:background .12s ease;
+  }
+  #site-header .pdf-menu-item:hover{ background:var(--bg-2); }
+  #site-header .pdf-menu-item svg{ flex-shrink:0; color:var(--ink-3); }
 
   nav.tabs{
     display:flex;
@@ -386,8 +413,10 @@
     padding:6px 10px;
     font-size:0.72rem;
   }
-  .mobile-mode #site-header .pdf-btns{
-    gap:6px;
+  .mobile-mode #site-header .pdf-menu{
+    right:0;
+    left:auto;
+    min-width:190px;
   }
   .mobile-mode nav.tabs{
     padding:0 8px;
@@ -507,21 +536,31 @@
     <h1>CONINAGRO - MONITOR AGROPECUARIO</h1>
     <div class="updated">Actualizado: <span id="updated-date">—</span></div>
   </div>
-  <div class="pdf-btns">
-  <a class="pdf-btn" href="https://drive.google.com/file/d/116SIDcY7C0LVJcPlmW9dnTDqKM5vUnEq/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+  <div class="pdf-dropdown">
+  <button type="button" class="pdf-btn" id="pdf-menu-btn" onclick="togglePdfMenu(event)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
       <polyline points="14 2 14 8 20 8"></polyline>
     </svg>
-    Informe Comercialización
-  </a>
-  <a class="pdf-btn" href="https://drive.google.com/file/d/1uhcKhp1M5bVcPxJ1AYVynKmlH5OJk4WU/view?usp=sharing" target="_blank" rel="noopener noreferrer">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-      <polyline points="14 2 14 8 20 8"></polyline>
+    Informes PDF
+    <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
-    Informe Producción
-  </a>
+  </button>
+  <div class="pdf-menu" id="pdf-menu">
+    <a class="pdf-menu-item" href="https://drive.google.com/file/d/116SIDcY7C0LVJcPlmW9dnTDqKM5vUnEq/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      Comercialización
+    </a>
+    <a class="pdf-menu-item" href="https://drive.google.com/file/d/1uhcKhp1M5bVcPxJ1AYVynKmlH5OJk4WU/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      Producción
+    </a>
+    <a class="pdf-menu-item" href="https://drive.google.com/file/d/1pJjSvF3KzufR0ojMcK43ljkGvV_RNzd6/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      Insumo-Producto
+    </a>
+  </div>
   </div>
 </header>
 
@@ -1728,6 +1767,27 @@ function initDeviceSelect(){
   const card = document.querySelector(`.ds-card[data-mode="${suggested}"]`);
   if (card) card.classList.add('suggested');
 }
+
+/* =========================================================
+   MENU PDF — dropdown unico en el header
+   ========================================================= */
+function togglePdfMenu(e){
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('pdf-menu');
+  const btn = document.getElementById('pdf-menu-btn');
+  if (!menu || !btn) return;
+  const isOpen = menu.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+}
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('pdf-menu');
+  const btn = document.getElementById('pdf-menu-btn');
+  if (!menu || !btn) return;
+  if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)){
+    menu.classList.remove('open');
+    btn.classList.remove('open');
+  }
+});
 
 /* =========================================================
    HEADER — fecha de actualización + auto-hide en scroll
