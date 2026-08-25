@@ -140,22 +140,25 @@ body{height:auto!important;display:block!important;overflow:visible!important}
 .obs-meta-row b{color:var(--ink-2);font-weight:600}
 
 /* ── Prices screen: back button ── */
-.prices-back{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:30px;height:30px;
+.prices-back{background:var(--bg-2);border:1px solid var(--line);color:var(--ink);width:30px;height:30px;
   border-radius:6px;cursor:pointer;font-size:16px;margin-right:4px;transition:background .15s}
-.prices-back:hover{background:rgba(255,255,255,.22)}
+.prices-back:hover{background:var(--line)}
 #s-precios .hdr{flex-shrink:0}
+#s-precios .hdr-controls{flex-shrink:0}
 #s-precios .strip-wrap{flex-shrink:0}
 #s-precios .body{flex:1;overflow-y:auto}
 
-.hdr{background:var(--brand);color:white;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
-.hdr-left .title{font-size:14px;font-weight:600;letter-spacing:-.01em}
-.hdr-left .sub{font-size:10px;opacity:0.65;margin-top:2px}
-.hdr-mid{display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:1;justify-content:center}
-.ctrl-lbl{font-size:10px;opacity:0.6;text-transform:uppercase;letter-spacing:.05em;margin-left:4px}
-.btn-g{display:flex;gap:2px}
-.hbtn{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.18);border-radius:5px;padding:4px 9px;font-size:11px;cursor:pointer;transition:all .15s;font-weight:500}
-.hbtn:hover{background:rgba(255,255,255,0.16)}
-.hbtn.on{background:#fff;color:var(--brand);border-color:#fff;font-weight:600}
+.hdr{background:#fff;color:var(--ink);padding:14px 24px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;border-bottom:1px solid var(--line)}
+.hdr-left .title{font-size:14px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.hdr-left .sub{font-size:10px;color:var(--ink-3);margin-top:2px}
+.hdr-controls{background:#fff;display:flex;align-items:center;gap:12px;padding:9px 24px;border-bottom:1px solid var(--line);flex-shrink:0;overflow-x:auto;white-space:nowrap}
+.ctrl-group{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.ctrl-sep{width:1px;height:14px;background:var(--line);flex-shrink:0}
+.ctrl-lbl{font-size:9px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.03em}
+.btn-g{display:flex;gap:5px;flex-shrink:0}
+.hbtn{background:var(--bg-2);color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:10px;cursor:pointer;transition:all .15s;font-weight:500;white-space:nowrap}
+.hbtn:hover{background:var(--line)}
+.hbtn.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
 
 .strip-wrap{background:var(--surface);border-bottom:1px solid var(--line);padding:0 14px;flex-shrink:0}
 .strip{display:flex;gap:7px;overflow-x:auto;padding:10px 0;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
@@ -247,8 +250,8 @@ tr:hover td{background:var(--bg-2)}
 
 
 /* ── Mobile mode: prices screen ── */
-.mobile-mode #s-precios .hdr{flex-wrap:wrap;gap:6px;padding:10px 14px}
-.mobile-mode #s-precios .hdr-mid{justify-content:flex-start;gap:4px}
+.mobile-mode #s-precios .hdr{padding:10px 14px}
+.mobile-mode #s-precios .hdr-controls{padding:8px 14px;gap:8px}
 .mobile-mode #s-precios .cbox{height:340px!important}
 .mobile-mode #s-precios .krow{grid-template-columns:repeat(2,1fr)}
 .mobile-mode #s-precios .hdr-left .title{font-size:13px}
@@ -661,13 +664,18 @@ tr:hover td{background:var(--bg-2)}
       <div class="title">CONI-MONITOR — Evolución de Precios</div>
       <div class="sub">Evolución y relación de precios insumo-producto agropecuarios · Datos hasta <span id="last-date-lbl"></span></div>
     </div>
-    <div class="hdr-mid">
+  </div>
+  <div class="hdr-controls">
+    <div class="ctrl-group">
       <span class="ctrl-lbl">Moneda</span>
       <div class="btn-g">
         <button class="hbtn on" id="btn-ars" onclick="setSection('ARS_nominal')">ARS</button>
         <button class="hbtn" id="btn-usd" onclick="setSection('USD_oficial')">USD</button>
         <span class="tip-wrap"><button class="hbtn" id="btn-arsc" onclick="setSection('ARS_const')">ARS const.</button><span class="tip-box">Serie en pesos constantes: cada valor equivale a lo que costaría en mayo de 2026</span></span>
       </div>
+    </div>
+    <div class="ctrl-sep"></div>
+    <div class="ctrl-group">
       <span class="ctrl-lbl">Período</span>
       <div class="btn-g">
         <button class="hbtn" id="btn-3" onclick="setYears(3)">3a</button>
@@ -675,13 +683,15 @@ tr:hover td{background:var(--bg-2)}
         <button class="hbtn" id="btn-10" onclick="setYears(10)">10a</button>
         <button class="hbtn" id="btn-0" onclick="setYears(0)">Todo</button>
       </div>
+    </div>
+    <div class="ctrl-sep"></div>
+    <div class="ctrl-group">
       <span class="ctrl-lbl">Gráfico</span>
       <div class="btn-g">
         <button class="hbtn on" id="btn-line" onclick="setChartType('line')">Línea</button>
         <button class="hbtn" id="btn-bar" onclick="setChartType('bar')">Barras</button>
       </div>
     </div>
-
   </div>
   <div class="strip-wrap"><div class="strip" id="strip"></div></div>
   <div class="body" id="body">
