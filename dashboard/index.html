@@ -1737,6 +1737,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   initLiquidacion();
   initHeader();
   initProduccion();
+
+  // Permite abrir directamente una pestaña vía ?view=insumoproducto o #insumoproducto
+  const validViews = ['comercializacion', 'produccion', 'insumoproducto'];
+  const params = new URLSearchParams(window.location.search);
+  const requestedView = params.get('view') || (window.location.hash ? window.location.hash.replace('#', '') : null);
+  if (requestedView && validViews.includes(requestedView)) {
+    showView(requestedView);
+  }
 });
 
 /* =========================================================
