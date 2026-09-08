@@ -774,6 +774,113 @@ function parseFobPrices(text){
   };
 }
 
+const HIST_FOB_PRICES = {
+  'Jan-19': {soja:347, maiz:173, trigo:234},
+  'Feb-19': {soja:346, maiz:170, trigo:243},
+  'Mar-19': {soja:334, maiz:162, trigo:229},
+  'Apr-19': {soja:318, maiz:155, trigo:220},
+  'May-19': {soja:320, maiz:164, trigo:219},
+  'Jun-19': {soja:346, maiz:181, trigo:244},
+  'Jul-19': {soja:341, maiz:175, trigo:244},
+  'Aug-19': {soja:347, maiz:152, trigo:237},
+  'Sep-19': {soja:347, maiz:146, trigo:228},
+  'Oct-19': {soja:353, maiz:155, trigo:226},
+  'Nov-19': {soja:353, maiz:166, trigo:197},
+  'Dec-19': {soja:363, maiz:172, trigo:201},
+  'Jan-20': {soja:361, maiz:184, trigo:226},
+  'Feb-20': {soja:346, maiz:178, trigo:240},
+  'Mar-20': {soja:324, maiz:169, trigo:243},
+  'Apr-20': {soja:325, maiz:157, trigo:244},
+  'May-20': {soja:328, maiz:145, trigo:239},
+  'Jun-20': {soja:345, maiz:148, trigo:240},
+  'Jul-20': {soja:360, maiz:154, trigo:243},
+  'Aug-20': {soja:368, maiz:164, trigo:240},
+  'Sep-20': {soja:410, maiz:185, trigo:246},
+  'Oct-20': {soja:447, maiz:217, trigo:255},
+  'Nov-20': {soja:482, maiz:226, trigo:259},
+  'Dec-20': {soja:501, maiz:231, trigo:270},
+  'Jan-21': {soja:557, maiz:255, trigo:282},
+  'Feb-21': {soja:554, maiz:247, trigo:271},
+  'Mar-21': {soja:520, maiz:235, trigo:266},
+  'Apr-21': {soja:531, maiz:256, trigo:266},
+  'May-21': {soja:557, maiz:270, trigo:279},
+  'Jun-21': {soja:527, maiz:248, trigo:274},
+  'Jul-21': {soja:532, maiz:237, trigo:276},
+  'Aug-21': {soja:534, maiz:237, trigo:285},
+  'Sep-21': {soja:544, maiz:240, trigo:292},
+  'Oct-21': {soja:540, maiz:247, trigo:302},
+  'Nov-21': {soja:542, maiz:251, trigo:314},
+  'Dec-21': {soja:560, maiz:259, trigo:317},
+  'Jan-22': {soja:602, maiz:272, trigo:304},
+  'Feb-22': {soja:646, maiz:287, trigo:317},
+  'Mar-22': {soja:688, maiz:335, trigo:410},
+  'Apr-22': {soja:652, maiz:316, trigo:421},
+  'May-22': {soja:648, maiz:314, trigo:465},
+  'Jun-22': {soja:647, maiz:298, trigo:479},
+  'Jul-22': {soja:591, maiz:270, trigo:425},
+  'Aug-22': {soja:606, maiz:280, trigo:407},
+  'Sep-22': {soja:580, maiz:294, trigo:402},
+  'Oct-22': {soja:587, maiz:308, trigo:422},
+  'Nov-22': {soja:600, maiz:300, trigo:414},
+  'Dec-22': {soja:615, maiz:311, trigo:395},
+  'Jan-23': {soja:616, maiz:310, trigo:375},
+  'Feb-23': {soja:621, maiz:312, trigo:363},
+  'Mar-23': {soja:606, maiz:298, trigo:349},
+  'Apr-23': {soja:565, maiz:281, trigo:344},
+  'May-23': {soja:526, maiz:253, trigo:365},
+  'Jun-23': {soja:540, maiz:237, trigo:359},
+  'Jul-23': {soja:556, maiz:228, trigo:335},
+  'Aug-23': {soja:528, maiz:219, trigo:321},
+  'Sep-23': {soja:545, maiz:236, trigo:313},
+  'Oct-23': {soja:512, maiz:245, trigo:303},
+  'Nov-23': {soja:528, maiz:213, trigo:258},
+  'Dec-23': {soja:508, maiz:216, trigo:247},
+  'Jan-24': {soja:464, maiz:208, trigo:244},
+  'Feb-24': {soja:415, maiz:190, trigo:232},
+  'Mar-24': {soja:422, maiz:189, trigo:221},
+  'Apr-24': {soja:425, maiz:194, trigo:244},
+  'May-24': {soja:455, maiz:197, trigo:283},
+  'Jun-24': {soja:444, maiz:192, trigo:288},
+  'Jul-24': {soja:426, maiz:183, trigo:272},
+  'Aug-24': {soja:401, maiz:185, trigo:269},
+  'Sep-24': {soja:421, maiz:194, trigo:257},
+  'Oct-24': {soja:416, maiz:208, trigo:242},
+  'Nov-24': {soja:418, maiz:209, trigo:225},
+  'Dec-24': {soja:411, maiz:209, trigo:227},
+  'Jan-25': {soja:416, maiz:224, trigo:229},
+  'Feb-25': {soja:405, maiz:228, trigo:237},
+  'Mar-25': {soja:404, maiz:217, trigo:243},
+  'Apr-25': {soja:401, maiz:222, trigo:248},
+  'May-25': {soja:389, maiz:205, trigo:235},
+  'Jun-25': {soja:395, maiz:192, trigo:233},
+  'Jul-25': {soja:401, maiz:197, trigo:231},
+  'Aug-25': {soja:416, maiz:200, trigo:232},
+  'Sep-25': {soja:411, maiz:200, trigo:226},
+  'Oct-25': {soja:406, maiz:201, trigo:219},
+  'Nov-25': {soja:437, maiz:208, trigo:212},
+  'Dec-25': {soja:418, maiz:216, trigo:208},
+  'Jan-26': {soja:407, maiz:216, trigo:208},
+  'Feb-26': {soja:433, maiz:210, trigo:207},
+  'Mar-26': {soja:434, maiz:207, trigo:215},
+  'Apr-26': {soja:423, maiz:211, trigo:227},
+  'May-26': {soja:434, maiz:210, trigo:233},
+  'Jun-26': {soja:416, maiz:197, trigo:235},
+  'Jul-26': {soja:452, maiz:207, trigo:231}
+};
+
+function fillHistoricalFob(dataArr, crop){
+  if (!dataArr) return;
+  dataArr.forEach(r => {
+    if ((r.precio === null || r.precio === undefined) && HIST_FOB_PRICES[r.mes_ano]){
+      const p = HIST_FOB_PRICES[r.mes_ano][crop];
+      if (p !== undefined && r.queda_vender_tn !== null && r.queda_vender_tn !== undefined){
+        r.precio = p;
+        r.queda_vender_musd = Math.round(r.queda_vender_tn * p / 1000);
+      }
+    }
+  });
+             }
+
 function parseCSV(text){
   const rows = [];
   let row = [], field = '', inQuotes = false;
@@ -1001,6 +1108,9 @@ async function loadLiveData(){
     if (cv.rawSoja.length) SOJA_RAW = cv.rawSoja;
     if (cv.rawMaiz.length) MAIZ_RAW = cv.rawMaiz;
     if (cv.rawTrigo.length) TRIGO_RAW = cv.rawTrigo;
+    fillHistoricalFob(SOJA_DATA, 'soja');
+    fillHistoricalFob(MAIZ_DATA, 'maiz');
+    fillHistoricalFob(TRIGO_DATA, 'trigo');
 
     const liq = parseLiquidacion(liquidacionText);
     if (Object.keys(liq.mensual).length) LIQUIDACION_DATA = liq;
@@ -1078,6 +1188,10 @@ let TRIGO_DATA = [
   {"campaña":"25/26","mes_ano":"May-26","fecha_info":"5/20/2026","produccion":27900,"pct_comprado":65,"total_comprado":18196,"expo":15237.8,"industria":2958.4,"saldo_fijar_1":2278.9,"saldo_fijar_2":13,"queda_vender_tn":9704,"precio":233,"queda_vender_musd":2261},
   {"campaña":"25/26","mes_ano":"Jun-26","fecha_info":"6/24/2026","produccion":27900,"pct_comprado":70,"total_comprado":19396,"expo":15952.1,"industria":3444.1,"saldo_fijar_1":1983.2,"saldo_fijar_2":10,"queda_vender_tn":8504,"precio":236,"queda_vender_musd":2007},{"campaña":"25/26","mes_ano":"Jul-26","fecha_info":"7/29/2026","produccion":27900,"pct_comprado":74,"total_comprado":20648,"expo":16788.0,"industria":3859.6,"saldo_fijar_1":1735.4,"saldo_fijar_2":8,"queda_vender_tn":7252,"precio":null,"queda_vender_musd":null}
 ];
+
+fillHistoricalFob(SOJA_DATA, 'soja');
+fillHistoricalFob(MAIZ_DATA, 'maiz');
+fillHistoricalFob(TRIGO_DATA, 'trigo');
 
 // Filas completas (todos los meses de todas las campañas) para superponer campaña actual,
 // campaña anterior y promedio histórico en el gráfico de evolución. De respaldo usan el
