@@ -754,8 +754,24 @@
 const SHEET_ID = '1GZww9zFk7IGshIhE3HIr8cvvF4x4UUxf';
 const GID_COMPRAS_VENTAS = '839058701';
 const GID_LIQUIDACION = '576322567';
+const SHEET_ID_FOB = '1ZJhaQADjDzbQhtVemivVMv9dvIn9RkE1nmCpK8g1ZhY';
+const GID_FOB = '107418392';
 function sheetCsvUrl(gid){
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+}
+
+function fobCsvUrl(){
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID_FOB}/export?format=csv&gid=${GID_FOB}`;
+}
+
+function parseFobPrices(text){
+  const rows = parseCSV(text);
+  const cell = (r, c) => rows[r] && rows[r][c] !== undefined ? parseArgNumber(rows[r][c]) : null;
+  return {
+    trigo: cell(6, 1),
+    maiz: cell(16, 1),
+    soja: cell(26, 1)
+  };
 }
 
 function parseCSV(text){
@@ -961,6 +977,17 @@ function parseLiquidacion(text){
   };
 }
 
+function applyFobPrice(dataArr, fobPrice){
+  if (!dataArr || !dataArr.length || fobPrice === null || fobPrice === undefined) return;
+  const last = dataArr[dataArr.length - 1];
+  if (last.precio === null || last.precio === undefined){
+    last.precio = fobPrice;
+    if (last.queda_vender_tn !== null && last.queda_vender_tn !== undefined){
+      last.queda_vender_musd = Math.round(last.queda_vender_tn * fobPrice / 1000);
+    }
+  }
+}
+
 async function loadLiveData(){
   try {
     const [comprasText, liquidacionText] = await Promise.all([
@@ -979,6 +1006,16 @@ async function loadLiveData(){
     if (Object.keys(liq.mensual).length) LIQUIDACION_DATA = liq;
   } catch (err){
     console.warn('No se pudo sincronizar en vivo con Google Sheets, se muestran los últimos datos disponibles.', err);
+  }
+
+  try {
+    const fobText = await fetch(fobCsvUrl()).then(r => { if (!r.ok) throw new Error('No se pudo leer precios FOB'); return r.text(); });
+    const fob = parseFobPrices(fobText);
+    applyFobPrice(SOJA_DATA, fob.soja);
+    applyFobPrice(MAIZ_DATA, fob.maiz);
+    applyFobPrice(TRIGO_DATA, fob.trigo);
+  } catch (err){
+    console.warn('No se pudo sincronizar precios FOB en vivo.', err);
   }
 }
 
