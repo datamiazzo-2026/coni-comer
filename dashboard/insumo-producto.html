@@ -826,7 +826,7 @@ function detectDevice(){
 }
 
 const NAME_MAP = {"Alambres - Alambre 17/15 Fortín": ["Alambre", ""], "Bovina de carne - Ternero 160-180 kg": ["Ternero", ""], "Camioneta - Hilux 4x4 CS DX 2.4 TDI 6 MT HAR": ["Camioneta pick-up", ""], "Combustibles - Gasoil": ["Gasoil", ""], "Cosechadoras - S550SS30": ["Cosechadora", ""], "Costo construcción": ["Costo construcción", ""], "Disponible - Maíz": ["Maíz", ""], "Empleo - Empleado rural": ["Empleado rural", ""], "Empleo - Salario actividad yerbatera": ["Salario yerbatero", ""], "Fertilizante - Fosfato monoamónico": ["Fosfato monoamónico", ""], "Fertilizantes - Urea granulada": ["Urea granulada", ""], "Flete - Flete 300 km": ["Flete 300 km", ""], "Forrajeras - Alfalfa EBC 90": ["Alfalfa", ""], "Forrajeras - Rye Grass Anual Rio (diploide)": ["Rye Grass", ""], "Herbicidas - Glifosato 54%": ["Glifosato 54%", ""], "Inmueble - Valor Metro Cuadrado": ["Inmueble urbano", ""], "Porcino - Capón tipificado": ["Capón porcino", ""], "Precios de la Hacienda Bovina - Vaca conserva buena": ["Vaca conserva", ""], "Precios de la Hacienda Lechera - Terneras R.C. de 12 a 14 meses de edad": ["Ternera lechera", ""], "Sembradoras - TX Mega 13/52 13 surcos a 52 cm/70 cm fert. simple": ["Sembradora", ""], "Semillas - Semilla Maíz Media Tecnologia": ["Semilla de maíz", ""], "Tierra - Tierra en zona de cría": ["Tierra de cría", ""], "Tierra - Tierra en zona de invernada": ["Tierra de invernada", ""], "Tierra - Tierra en zona maicera": ["Tierra agrícola", ""], "Tractores - 6135J, Cabinado, TD, RS 18.4 - 38 R1 10PR": ["Tractor", ""], "Índices - Merval": ["Merval", ""]};
-const ICON_KEY_BY_LABEL = {"Alambres - Alambre 17/15 Fortín":"alambre","Bovina de carne - Ternero 160-180 kg":"ternero","Camioneta - Hilux 4x4 CS DX 2.4 TDI 6 MT HAR":"camioneta","Combustibles - Gasoil":"gasoil","Cosechadoras - S550SS30":"cosechadora","Costo construcción":"construccion","Disponible - Maíz":"maiz","Empleo - Empleado rural":"empleo","Empleo - Salario actividad yerbatera":"empleo","Fertilizante - Fosfato monoamónico":"fosfato","Fertilizantes - Urea granulada":"urea","Flete - Flete 300 km":"flete","Forrajeras - Alfalfa EBC 90":"forraje","Forrajeras - Rye Grass Anual Rio (diploide)":"forraje","Herbicidas - Glifosato 54%":"glifosato","Inmueble - Valor Metro Cuadrado":"construccion","Porcino - Capón tipificado":"cerdo","Precios de la Hacienda Bovina - Vaca conserva buena":"novillito","Precios de la Hacienda Lechera - Terneras R.C. de 12 a 14 meses de edad":"ternero","Sembradoras - TX Mega 13/52 13 surcos a 52 cm/70 cm fert. simple":"tractor","Semillas - Semilla Maíz Media Tecnologia":"semilla","Tierra - Tierra en zona de cría":"tierra","Tierra - Tierra en zona de invernada":"tierra","Tierra - Tierra en zona maicera":"tierra","Tractores - 6135J, Cabinado, TD, RS 18.4 - 38 R1 10PR":"tractor","Índices - Merval":"merval"};
+const ICON_KEY_BY_LABEL = {"Alambres - Alambre 17/15 Fortín":"alambre","Bovina de carne - Ternero 160-180 kg":"ternero","Camioneta - Hilux 4x4 CS DX 2.4 TDI 6 MT HAR":"camioneta","Combustibles - Gasoil":"gasoil","Combustible - Gasoil agropecuario":"gasoil","Cosechadoras - S550SS30":"cosechadora","Costo construcción":"construccion","Disponible - Maíz":"maiz","Empleo - Empleado rural":"empleo","Empleo - Salario actividad yerbatera":"empleo","Fertilizante - Fosfato monoamónico":"fosfato","Fertilizantes - Urea granulada":"urea","Flete - Flete 300 km":"flete","Forrajeras - Alfalfa EBC 90":"forraje","Forrajeras - Rye Grass Anual Rio (diploide)":"forraje","Herbicidas - Glifosato 54%":"glifosato","Inmueble - Valor Metro Cuadrado":"construccion","Porcino - Capón tipificado":"cerdo","Precios de la Hacienda Bovina - Vaca conserva buena":"novillito","Precios de la Hacienda Lechera - Terneras R.C. de 12 a 14 meses de edad":"ternero","Sembradoras - TX Mega 13/52 13 surcos a 52 cm/70 cm fert. simple":"tractor","Semillas - Semilla Maíz Media Tecnologia":"semilla","Tierra - Tierra en zona de cría":"tierra","Tierra - Tierra en zona de invernada":"tierra","Tierra - Tierra en zona maicera":"tierra","Tractores - 6135J, Cabinado, TD, RS 18.4 - 38 R1 10PR":"tractor","Índices - Merval":"merval"};
 function iconFor(full){return ICONS[ICON_KEY_BY_LABEL[full]] || '';}
 
 function fmtNum(n, dec) {
@@ -916,7 +916,7 @@ function showProductDetail(key, idx) {
   document.getElementById('dtitle-' + key).innerHTML = '<span class="dtitle-icon">' + iconFor(ins.full) + '</span>' + esc(nmEntry[0]);
   document.getElementById('ddesc-'  + key).textContent = ins.desc;
   document.getElementById('sv-last-'+ key).textContent = fmtNum(ins.last, 2);
-  document.getElementById('sv-unit-'+ key).textContent = ins.desc.includes('tn') ? 'tn / unidad' : 'kg / unidad';
+  document.getElementById('sv-unit-'+ key).textContent = ins.desc.split(' ')[0] + ' / unidad';
   const v1 = ins.var1y, v5 = ins.var5y;
   const e1 = document.getElementById('sv-1y-' + key);
   const e5 = document.getElementById('sv-5y-' + key);
@@ -929,7 +929,7 @@ function showProductDetail(key, idx) {
   const u5 = e5.parentNode.querySelector('.sunit'); if(u5) u5.textContent='';
 
   // Absolute variations
-  const unit = ins.desc.includes('tn') ? 'tn' : 'kg';
+  const unit = ins.desc.split(' ')[0];
   const abs1y = ins.last - (ins.last / (1 + v1 / 100));
   const abs5y = ins.last - ins.avg5y;
   const sa1y = document.getElementById('sa-1y-' + key);
@@ -1232,8 +1232,8 @@ function render(){
     const last=vals[vals.length-1],prev=vals.length>1?vals[vals.length-2]:null;
     const pct=prev?(last-prev)/prev*100:null,total=vals.length>=2?(vals[vals.length-1]-vals[0])/vals[0]*100:null;
     const cc=pct==null?'ne':pct>=0?'up':'dn';
-    const unit=displayUnit(prod,section);
-    kpi+=`<div class="kcard" style="--kc:${chip.color}"><div class="kl">${chip.label}</div><div class="kv">${fmt(last)}</div><div class="ku">${unit}</div>${pct!=null?`<div class="km ${cc}">${pct>=0?'▲':'▼'} ${Math.abs(pct).toFixed(1)}% vs mes ant.</div>`:''} ${total!=null?`<div class="km ne">Período: ${total>=0?'+':''}${total.toFixed(0)}%</div>`:''}</div>`;
+    const unit=displayUnit(prod,section);const lastDateConDato=[...dates].reverse().find(d=>prod.series[d]!=null);let pctY=null,absY=null;if(lastDateConDato){const[yy,mm]=lastDateConDato.split('-');const yAgoVal=prod.series[(parseInt(yy,10)-1)+'-'+mm];if(yAgoVal!=null){absY=last-yAgoVal;pctY=(last-yAgoVal)/yAgoVal*100;}}const ccY=pctY==null?'ne':pctY>=0?'up':'dn';
+    kpi+=`<div class="kcard" style="--kc:${chip.color}"><div class="kl">${chip.label}</div><div class="kv">${fmt(last)}</div><div class="ku">${unit}</div>${pct!=null?`<div class="km ${cc}">${pct>=0?'▲':'▼'} ${Math.abs(pct).toFixed(1)}% vs mes ant.</div>`:''}${pctY!=null?`<div class="km ${ccY}">${pctY>=0?'▲':'▼'} ${Math.abs(pctY).toFixed(1)}% vs año ant. (${absY>=0?'+':''}${fmt(absY)} ${unit})</div>`:''} ${total!=null?`<div class="km ne">Período: ${total>=0?'+':''}${total.toFixed(0)}%</div>`:''}</div>`;
   });kpi+='</div>';
 
   const cid='c'+Date.now();
@@ -1308,7 +1308,7 @@ function openMobileDetail(key, idx) {
   document.getElementById('d-desc').textContent = ins.desc;
 
   // Stats
-  const unit = ins.desc.includes('tn') ? 'tn' : 'kg';
+  const unit = ins.desc.split(' ')[0];
   document.getElementById('d-last').textContent = fmtNum(ins.last, 2);
   document.getElementById('d-unit').textContent = unit + ' / unidad';
 
