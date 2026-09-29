@@ -698,7 +698,7 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-granos)">
       <h2>Granos: comparación histórica</h2>
-      <div class="desc">Campaña actual (2025/2026) vs. campaña anterior y promedio de los últimos 5 años. Actualizado mensualmente.</div>
+      <div class="desc">Campaña actual (2026/2027) vs. campaña anterior y promedio de los últimos 5 años. Actualizado mensualmente.</div>
       <div class="metric-select" id="granos-metric-select"></div>
       <div class="data-table-wrap"><table class="data-table" id="granos-table"></table></div>
       <div class="chart-source">Fuente: CONINAGRO en base a Bolsa de Cereales de Buenos Aires y SAGyP</div>
@@ -711,7 +711,7 @@
 
     <div class="chart-section" style="--tab-accent:var(--accent-carnes)">
       <h2>Carnes y leche: producción, precios y VBP</h2>
-      <div class="desc">Últimos 12 meses / ago-26 vs. año anterior y promedio de los últimos 5 años.</div>
+      <div class="desc">Últimos 12 meses / sept-26 vs. año anterior y promedio de los últimos 5 años.</div>
       <div class="metric-select" id="carnes-metric-select"></div>
       <div class="data-table-wrap"><table class="data-table" id="carnes-table"></table></div>
       <div class="chart-source">Fuente: CONINAGRO en base a SAGyP</div>
@@ -1745,31 +1745,31 @@ function cardHtml(label, value, sub, accent){
 
 const GRANOS_DATA = {
   prod: [
-    {c:'Soja', actual:50.1, ant:50.3, prom5:41.6, varAnt:0, varProm5:20},
-    {c:'Maíz', actual:64.0, ant:49.0, prom5:47.9, varAnt:31, varProm5:34},
-    {c:'Sorgo', actual:2.9, ant:3.1, prom5:3.1, varAnt:-6, varProm5:-6},
-    {c:'Girasol', actual:6.6, ant:5.0, prom5:4.0, varAnt:32, varProm5:65},
-    {c:'Trigo', actual:27.8, ant:18.6, prom5:17.1, varAnt:49, varProm5:63},
-    {c:'Cebada', actual:5.4, ant:5.0, prom5:4.7, varAnt:8, varProm5:14},
-    {c:'Total', actual:156.8, ant:131.0, prom5:118.4, varAnt:20, varProm5:32, total:true}
+    {c:'Soja', actual:53.6, ant:50.1, prom5:43.0, varAnt:7, varProm5:25},
+    {c:'Maíz', actual:66.0, ant:64.0, prom5:49.7, varAnt:3, varProm5:33},
+    {c:'Sorgo', actual:2.9, ant:2.8, prom5:3.0, varAnt:2, varProm5:-4},
+    {c:'Girasol', actual:7.0, ant:6.6, prom5:4.6, varAnt:6, varProm5:51},
+    {c:'Trigo', actual:23.4, ant:27.8, prom5:19.2, varAnt:-16, varProm5:22},
+    {c:'Cebada', actual:5.0, ant:5.4, prom5:5.0, varAnt:-7, varProm5:0},
+    {c:'Total', actual:157.9, ant:156.7, prom5:124.5, varAnt:1, varProm5:27, total:true}
   ],
   precio: [
-    {c:'Soja', actual:460, ant:406, prom5:517, varMes:11, varAnt:13, varProm5:-11},
-    {c:'Maíz', actual:211, ant:211, prom5:244, varMes:7, varAnt:0, varProm5:-13},
-    {c:'Sorgo', actual:216, ant:205, prom5:251, varMes:-6, varAnt:5, varProm5:-14},
-    {c:'Girasol', actual:537, ant:432, prom5:542, varMes:11, varAnt:24, varProm5:-1},
-    {c:'Trigo', actual:242, ant:253, prom5:305, varMes:3, varAnt:-4, varProm5:-21},
-    {c:'Cebada', actual:214, ant:212, prom5:258, varMes:-8, varAnt:1, varProm5:-17},
-    {c:'Total', actual:357, ant:329, prom5:405, varMes:6, varAnt:9, varProm5:-12, total:true}
+    {c:'Soja', actual:508, ant:426, prom5:496, varMes:9, varAnt:19, varProm5:2},
+    {c:'Maíz', actual:222, ant:210, prom5:236, varMes:4, varAnt:6, varProm5:-6},
+    {c:'Sorgo', actual:214, ant:210, prom5:245, varMes:-1, varAnt:2, varProm5:-13},
+    {c:'Girasol', actual:574, ant:461, prom5:518, varMes:5, varAnt:25, varProm5:11},
+    {c:'Trigo', actual:261, ant:221, prom5:298, varMes:7, varAnt:18, varProm5:-13},
+    {c:'Cebada', actual:231, ant:217, prom5:259, varMes:7, varAnt:6, varProm5:-11},
+    {c:'Total', actual:398, ant:329, prom5:389, varMes:9, varAnt:21, varProm5:2, total:true}
   ],
   vbp: [
-    {c:'Soja', actual:23046, ant:20402, prom5:21485, varAnt:13, varProm5:7},
-    {c:'Maíz', actual:13504, ant:10344, prom5:11671, varAnt:31, varProm5:16},
-    {c:'Sorgo', actual:626, ant:636, prom5:778, varAnt:-2, varProm5:-20},
-    {c:'Girasol', actual:3544, ant:2160, prom5:2167, varAnt:64, varProm5:64},
-    {c:'Trigo', actual:6728, ant:4704, prom5:5200, varAnt:43, varProm5:29},
-    {c:'Cebada', actual:1156, ant:1058, prom5:1218, varAnt:9, varProm5:-5},
-    {c:'Total', actual:48604, ant:39304, prom5:42520, varAnt:24, varProm5:14, total:true}
+    {c:'Soja', actual:27229, ant:21343, prom5:21320, varAnt:28, varProm5:28},
+    {c:'Maíz', actual:14652, ant:13435, prom5:11753, varAnt:9, varProm5:25},
+    {c:'Sorgo', actual:610, ant:587, prom5:730, varAnt:4, varProm5:-16},
+    {c:'Girasol', actual:4018, ant:3041, prom5:2401, varAnt:32, varProm5:67},
+    {c:'Trigo', actual:6107, ant:6147, prom5:5734, varAnt:-1, varProm5:7},
+    {c:'Cebada', actual:1155, ant:1173, prom5:1290, varAnt:-2, varProm5:-10},
+    {c:'Total', actual:53771, ant:45725, prom5:43230, varAnt:18, varProm5:24, total:true}
   ]
 };
 const GRANOS_DEC = { prod:1, precio:0, vbp:0 };
@@ -1801,36 +1801,36 @@ function buildGranosCards(){
   document.getElementById('granos-cards').innerHTML =
     cardHtml('Producción total', numFmt(prodTotal.actual,1), 'mill tn · ' + varSpan(prodTotal.varAnt) + ' vs. campaña anterior', true) +
     cardHtml('VBP total', 'US$ ' + numFmt(vbpTotal.actual,0) + ' M', varSpan(vbpTotal.varProm5) + ' vs. prom. 5 años') +
-    cardHtml('Precio promedio jul-26', 'US$ ' + numFmt(precioTotal.actual,0) + ' /tn', varSpan(precioTotal.varProm5) + ' vs. prom. 5 años');
+    cardHtml('Precio promedio sept-26', 'US$ ' + numFmt(precioTotal.actual,0) + ' /tn', varSpan(precioTotal.varProm5) + ' vs. prom. 5 años');
 }
 
 const CARNES_DATA = {
   prod: [
-    {p:'Bovina', actual:3.05, ant:3.21, prom5:3.21, varAnt:-5, varProm5:-5, dec:2},
-    {p:'Porcina', actual:0.86, ant:0.79, prom5:0.75, varAnt:10, varProm5:15, dec:2},
-    {p:'Aviar', actual:2.28, ant:2.32, prom5:2.34, varAnt:-2, varProm5:-2, dec:2},
+    {p:'Bovina', actual:3.03, ant:3.21, prom5:3.21, varAnt:-6, varProm5:-6, dec:2},
+    {p:'Porcina', actual:0.87, ant:0.79, prom5:0.75, varAnt:11, varProm5:15, dec:2},
+    {p:'Aviar', actual:2.26, ant:2.32, prom5:2.34, varAnt:-2, varProm5:-3, dec:2},
     {p:'Total carnes', actual:6.2, ant:6.3, prom5:6.3, varAnt:-2, varProm5:-2, dec:1, total:true},
-    {p:'Leche (mill litros)', actual:11915, ant:11185, prom5:11571, varAnt:7, varProm5:3, dec:0}
+    {p:'Leche (mill litros)', actual:11940, ant:11282, prom5:11594, varAnt:6, varProm5:3, dec:0}
   ],
   precio: [
-    {p:'Bovina', actual:2.7, ant:1.9, prom5:1.8, varAnt:39, varProm5:49, dec:1},
-    {p:'Porcina', actual:1.5, ant:1.5, prom5:1.2, varAnt:-1, varProm5:29, dec:1},
-    {p:'Aviar', actual:1.8, ant:2.0, prom5:1.9, varAnt:-10, varProm5:-1, dec:1},
-    {p:'Total carnes', actual:2.3, ant:1.9, prom5:1.8, varAnt:21, varProm5:31, dec:1, total:true},
-    {p:'Leche (mill litros)', actual:0.35, ant:0.37, prom5:0.39, varAnt:-5, varProm5:-9, dec:2}
+    {p:'Bovina', actual:2.6, ant:2.1, prom5:1.9, varAnt:23, varProm5:40, dec:1},
+    {p:'Porcina', actual:1.6, ant:1.4, prom5:1.2, varAnt:16, varProm5:33, dec:1},
+    {p:'Aviar', actual:1.6, ant:1.5, prom5:1.9, varAnt:9, varProm5:-16, dec:1},
+    {p:'Total carnes', actual:2.2, ant:1.9, prom5:1.8, varAnt:21, varProm5:23, dec:1, total:true},
+    {p:'Leche (mill litros)', actual:0.35, ant:0.34, prom5:0.37, varAnt:4, varProm5:-4, dec:2}
   ],
   vbp: [
-    {p:'Bovina', actual:8959, ant:7102, prom5:6343, varAnt:26, varProm5:41, dec:0},
-    {p:'Porcina', actual:1307, ant:1202, prom5:882, varAnt:9, varProm5:48, dec:0},
-    {p:'Aviar', actual:4174, ant:4695, prom5:4331, varAnt:-11, varProm5:-4, dec:0},
-    {p:'Total carnes', actual:14439, ant:12998, prom5:11556, varAnt:11, varProm5:25, dec:0, total:true},
-    {p:'Leche (mill litros)', actual:4227, ant:4178, prom5:4506, varAnt:1, varProm5:-6, dec:0}
+    {p:'Bovina', actual:8612, ant:6885, prom5:6273, varAnt:25, varProm5:37, dec:0},
+    {p:'Porcina', actual:1364, ant:1066, prom5:886, varAnt:28, varProm5:54, dec:0},
+    {p:'Aviar', actual:3593, ant:3379, prom5:4408, varAnt:6, varProm5:-18, dec:0},
+    {p:'Total carnes', actual:13569, ant:11330, prom5:11567, varAnt:20, varProm5:17, dec:0, total:true},
+    {p:'Leche (mill litros)', actual:4228, ant:3825, prom5:4273, varAnt:11, varProm5:-1, dec:0}
   ]
 };
 
 function renderCarnesTable(metric){
   const rows = CARNES_DATA[metric];
-  const firstLabel = metric === 'prod' ? 'Últ. 12 meses' : 'ago-26';
+  const firstLabel = metric === 'prod' ? 'Últ. 12 meses' : 'sept-26';
   const thead = '<thead><tr><th>Producto</th><th>' + firstLabel + '</th><th>Año anterior</th><th>Prom. 5 años</th><th>Var año ant.</th><th>Var prom. 5a</th></tr></thead>';
   const tbody = rows.map(r => '<tr class="' + (r.total?'total-row':'') + '"><td>' + r.p + '</td><td>' + numFmt(r.actual, r.dec) + '</td><td>' + numFmt(r.ant, r.dec) + '</td><td>' + numFmt(r.prom5, r.dec) + '</td><td>' + varSpan(r.varAnt) + '</td><td>' + varSpan(r.varProm5) + '</td></tr>').join('');
   document.getElementById('carnes-table').innerHTML = thead + '<tbody>' + tbody + '</tbody>';
@@ -1860,12 +1860,12 @@ function buildCarnesCards(){
 const REGIONALES_DATA = [
   {p:'Arroz', camp:'2025-26', actual:1400000, ant:1600000, prom5:1374000, varAnt:-13, varProm5:2},
   {p:'Maní', camp:'2025-26', actual:1311996, ant:1895131, prom5:1408056, varAnt:-31, varProm5:-7},
-  {p:'Legumbres', camp:'2025-26', actual:1398000, ant:1292558, prom5:1049848, varAnt:8, varProm5:33},
+  {p:'Legumbres', camp:'2025-26', actual:1458000, ant:1292558, prom5:1049848, varAnt:13, varProm5:39},
   {p:'Algodón', camp:'2025-26', actual:770000, ant:1050000, prom5:1130000, varAnt:-27, varProm5:-32},
   {p:'Uva', camp:'2026', actual:1839130, ant:1990834, prom5:1905350, varAnt:-8, varProm5:-3},
-  {p:'Yerba mate', camp:'ago25-jul26', actual:847171, ant:876859, prom5:846043, varAnt:-3, varProm5:0},
-  {p:'Cítricos dulces', camp:'2025', actual:1734000, ant:1565000, prom5:1475271, varAnt:11, varProm5:18},
-  {p:'Peras y manzanas', camp:'ago25-jul26', actual:717862, ant:793712, prom5:885569, varAnt:-10, varProm5:-19}
+  {p:'Yerba mate', camp:'sept25-ago26', actual:847171, ant:876859, prom5:846043, varAnt:-3, varProm5:0},
+  {p:'Cítricos dulces', camp:'2025', actual:1543162, ant:1565000, prom5:1475271, varAnt:-1, varProm5:5},
+  {p:'Peras y manzanas', camp:'sept25-ago26', actual:717862, ant:793712, prom5:885569, varAnt:-10, varProm5:-19}
 ];
 
 function renderRegionalesTable(){
