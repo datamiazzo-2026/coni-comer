@@ -751,9 +751,9 @@
    y se reconstruyen los datos. Si el fetch falla (sin red, CORS, etc.)
    se usan los datos de respaldo embebidos más abajo.
    ========================================================= */
-const SHEET_ID = '1GZww9zFk7IGshIhE3HIr8cvvF4x4UUxf';
-const GID_COMPRAS_VENTAS = '839058701';
-const GID_LIQUIDACION = '576322567';
+const SHEET_ID = '1jmYwqRcfg0aKo9MXiHm30pNnPCnqd3Iq9IeF_BozWJg';
+const GID_COMPRAS_VENTAS = '2050657767';
+const GID_LIQUIDACION = '1686669238';
 const SHEET_ID_FOB = '1ZJhaQADjDzbQhtVemivVMv9dvIn9RkE1nmCpK8g1ZhY';
 const GID_FOB = '107418392';
 function sheetCsvUrl(gid){
@@ -1116,6 +1116,7 @@ async function loadLiveData(){
     if (Object.keys(liq.mensual).length) LIQUIDACION_DATA = liq;
   } catch (err){
     console.warn('No se pudo sincronizar en vivo con Google Sheets, se muestran los últimos datos disponibles.', err);
+    try{ const b=document.createElement('div'); b.style.cssText='background:#fff3cd;color:#664d03;padding:6px 12px;font-size:12px;text-align:center'; b.textContent='Aviso: no se pudo conectar con la planilla de datos. Se muestran los últimos datos guardados, que pueden estar desactualizados.'; document.body.insertBefore(b,document.body.firstChild);}catch(e2){}
   }
 
   try {
