@@ -61,6 +61,21 @@ for (const crop of ['soja', 'maiz', 'trigo']) {
 const fechas = Object.values(latestSummary).map(r => r.fecha_info);
 if (new Set(fechas).size > 1) err('Los cultivos terminan en fechas distintas: ' + JSON.stringify(Object.fromEntries(Object.entries(latestSummary).map(([k, r]) => [k, r.fecha_info]))));
 
+
+// 2b) Alineación de semanas: para el mes de corte, cada campaña anterior debe tener el dato de la misma semana calendario
+for (const crop of ['soja', 'maiz', 'trigo']) {
+  const rows = E.raw[crop];
+  const campañas = [...new Set(rows.map(r => r.campaña))].sort();
+  const vig = campañas[campañas.length - 1];
+  const cur = rows.filter(r => r.campaña === vig).sort((a, b) => new Date(a.fecha_info) - new Date(b.fecha_info)).pop();
+  const curD = new Date(cur.fecha_info);
+  rows.filter(r => r.campaña !== vig && r.mes_ano.split('-')[0] === cur.mes_ano.split('-')[0]).forEach(r => {
+    const d = new Date(r.fecha_info);
+    const diff = Math.abs((new Date(2000, d.getMonth(), d.getDate()) - new Date(2000, curD.getMonth(), curD.getDate())) / 864e5);
+    if (diff > 4) warn(`ALINEACIÓN ${crop} ${r.campaña} ${r.mes_ano}: fecha ${r.fecha_info} está a ${diff} días de la fecha vigente ${cur.fecha_info} (revisar el bloque alineado del Excel)`);
+  });
+}
+
 // 3) Liquidación
 const liq = E.liq;
 if (!liq || !liq.mensual || !liq.mensual['2026']) err('Liquidación: faltan datos de 2026');
