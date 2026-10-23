@@ -709,7 +709,7 @@ tr:hover td{background:var(--bg-2)}
       <div class="btn-g">
         <button class="hbtn on" id="btn-ars" onclick="setSection('ARS_nominal')">ARS</button>
         <button class="hbtn" id="btn-usd" onclick="setSection('USD_oficial')">USD</button>
-        <span class="tip-wrap"><button class="hbtn" id="btn-arsc" onclick="setSection('ARS_const')">ARS const.</button><span class="tip-box">Serie en pesos constantes: cada valor equivale a lo que costaría en mayo de 2026</span></span>
+        <span class="tip-wrap"><button class="hbtn" id="btn-arsc" onclick="setSection('ARS_const')">ARS const.</button><span class="tip-box">Pesos constantes: todos los precios expresados a valores del último mes de datos, para comparar en el tiempo sin el efecto de la inflación.</span></span>
       </div>
     </div>
     <div class="ctrl-sep"></div>
@@ -840,7 +840,7 @@ function fmtPct(n) {
 }
 
 
-const IPC_BASE_LABEL = "mayo de 2026";
+const IPC_BASE_LABEL = "septiembre de 2026";
 
 function go(id) {
   document.querySelectorAll('.prod-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.product === id));
@@ -1386,6 +1386,22 @@ function drawMobileChart(ins) {
 }
 
 document.addEventListener('DOMContentLoaded',function(){detectDevice();go('soja');});
+</script>
+<script>
+(function(){
+  try{
+    var M=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    var last='';
+    DATA.forEach(function(d){if(d.section==='ARS_const')Object.keys(d.series).forEach(function(k){if(k>last)last=k;});});
+    var lbl=last?M[parseInt(last.slice(5),10)-1]+' de '+last.slice(0,4):'el último mes disponible';
+    document.querySelectorAll('.tip-wrap').forEach(function(w){
+      var box=w.querySelector('.tip-box'); if(!box)return;
+      if(w.querySelector('#btn-arsc')) box.textContent='Pesos constantes: todos los precios expresados a valores de '+lbl+', para comparar en el tiempo sin el efecto de la inflación.';
+      function place(){var r=w.getBoundingClientRect();box.style.position='fixed';box.style.top=(r.bottom+8)+'px';var x=r.left+r.width/2;box.style.left=Math.max(120,Math.min(window.innerWidth-120,x))+'px';}
+      w.addEventListener('mouseenter',place);w.addEventListener('focusin',place);
+    });
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
